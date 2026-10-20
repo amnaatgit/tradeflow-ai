@@ -17,3 +17,24 @@ TradeFlow AI is a mobile-first tool for Pakistani social-commerce sellers that e
 
 Run `npm run build` and `npm run lint` before deploying.
 
+
+
+Phase 1 implemented: core AI parsing flow.
+
+Run:
+- npm install
+- npm run dev
+
+Secrets (.env or preview secrets):
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_ANON_KEY
+- SUPABASE_URL
+- SUPABASE_ANON_KEY
+- GEMINI_API_KEY
+- (optional) AI_MODEL to override default
+
+Notes:
+- Model names are centralized in lib/ai/config.ts
+- /api/parse authenticates via access token in body or Authorization header using getAccessToken + requireUser
+- In-memory per-user rate limit 10 req/min
+- Gemini calls use x-goog-api-key header and request generationConfig.responseMimeType = "application/json"

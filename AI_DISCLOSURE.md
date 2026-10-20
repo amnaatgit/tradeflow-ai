@@ -2,7 +2,7 @@
 
 ## Product AI
 
-None yet (provider/model to be confirmed when /api/parse is built).
+Provider: Google Gemini. Model is configured in lib/ai/config.ts (DEFAULT_MODEL = "gemini-3.1-flash-lite", FALLBACK_MODEL = "gemini-flash-latest", and the effective MODEL is process.env.AI_MODEL || DEFAULT_MODEL).
 
 ## Development AI
 

@@ -37,8 +37,9 @@ export function NavShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
       <nav className="border-b">
-        <div className="container mx-auto flex h-14 items-center gap-1 px-4">
+        <div className="container mx-auto flex h-14 items-center gap-1 overflow-x-auto whitespace-nowrap px-4">
           <NavLink href="/dashboard">Dashboard</NavLink>
+          <NavLink href="/orders/new">New Order</NavLink>
           <NavLink href="/orders">Orders</NavLink>
           <NavLink href="/dispatch">Dispatch</NavLink>
           <NavLink href="/khata">Khata</NavLink>
