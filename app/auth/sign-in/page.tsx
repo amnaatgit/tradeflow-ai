@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createClient } from "../../../lib/supabase/client";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
@@ -16,12 +17,11 @@ export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [reason, setReason] = useState<string | null>(null);
 
   useEffect(() => {
-    const r = new URLSearchParams(window.location.search).get("reason");
-       setReason(r);
+    setReady(true);
   }, []);
 
   async function onSubmit(e: React.FormEvent) {
@@ -29,18 +29,19 @@ export default function SignInPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/auth/credentials", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode: "signin", email: email.trim(), password }),
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
       });
-      const data = await res.json();
-      if (!res.ok || data.error) {
-        setError(data.error ?? "Sign in failed.");
+      if (signInError) {
+        setError(signInError.message);
         setLoading(false);
         return;
       }
-      window.location.assign(data.redirect);
+      // With 2FA on: enter the code. Without it: offer setup (with "Skip for now").
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      window.location.assign(aal?.nextLevel === "aal2" ? "/auth/verify" : "/auth/setup");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign in failed. Please try again.");
       setLoading(false);
@@ -54,11 +55,6 @@ export default function SignInPage() {
         <CardDescription>Sign in with your email and password.</CardDescription>
       </CardHeader>
       <CardContent>
-        {reason && (
-          <p className="mb-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-            {reason}
-          </p>
-        )}
         {error && (
           <p className="mb-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
             {error}
@@ -91,7 +87,7 @@ export default function SignInPage() {
               required
             />
           </div>
-          <Button type="submit" disabled={loading} className="w-full">
+          <Button type="submit" disabled={loading || !ready} className="w-full">
             {loading ? "Signing in..." : "Sign In"}
           </Button>
         </form>

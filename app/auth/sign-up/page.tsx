@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createClient } from "../../../lib/supabase/client";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
@@ -16,8 +17,13 @@ export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    setReady(true);
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -29,24 +35,25 @@ export default function SignUpPage() {
       setLoading(false);
       return;
     }
-       try {
-      const res = await fetch("/api/auth/credentials", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode: "signup", email: email.trim(), password }),
+    try {
+      const supabase = createClient();
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
       });
-      const data = await res.json();
-      if (!res.ok || data.error) {
-        setError(data.error ?? "Sign up failed.");
+      if (signUpError) {
+        setError(signUpError.message);
         setLoading(false);
         return;
       }
-      if (data.notice) {
-        setNotice(data.notice);
+      if (!data.session) {
+        setNotice(
+          "Account created, but email confirmation is ON in Supabase. Turn off 'Confirm email' (Authentication > Providers > Email), then sign in."
+        );
         setLoading(false);
         return;
       }
-      window.location.assign(data.redirect);
+      window.location.assign("/auth/setup");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign up failed. Please try again.");
       setLoading(false);
@@ -87,7 +94,7 @@ export default function SignUpPage() {
               minLength={6}
             />
           </div>
-          <Button type="submit" disabled={loading} className="w-full">
+          <Button type="submit" disabled={loading || !ready} className="w-full">
             {loading ? "Creating..." : "Sign up"}
           </Button>
         </form>

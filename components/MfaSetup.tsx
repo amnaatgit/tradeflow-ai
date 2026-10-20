@@ -85,11 +85,16 @@ export function MfaSetup() {
     window.location.assign("/dashboard");
   }
 
+  // 2FA is optional: continue to the app without turning it on.
+  function skip() {
+    window.location.assign("/dashboard");
+  }
+
   if (!factor) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Set up 2FA</CardTitle>
+          <CardTitle>Set up 2FA (optional)</CardTitle>
           <CardDescription>
             Add an extra layer of security to your account with an authenticator
             app.
@@ -104,7 +109,10 @@ export function MfaSetup() {
           <Button onClick={startEnroll} disabled={loading} className="w-full">
             {loading ? "Preparing QR code" : "Show QR code"}
           </Button>
-          <div className="mt-4 flex justify-center">
+          <div className="mt-4 flex justify-center gap-2">
+            <Button type="button" variant="ghost" size="sm" onClick={skip} disabled={loading}>
+              Skip for now
+            </Button>
             <SignOutButton />
           </div>
         </CardContent>
@@ -157,7 +165,10 @@ export function MfaSetup() {
             {loading ? "Verifying" : "Verify and continue"}
           </Button>
         </form>
-        <div className="mt-4 flex justify-center">
+        <div className="mt-4 flex justify-center gap-2">
+          <Button type="button" variant="ghost" size="sm" onClick={skip} disabled={loading}>
+            Skip for now
+          </Button>
           <SignOutButton />
         </div>
       </CardContent>

@@ -10,7 +10,7 @@ TradeFlow AI is a mobile-first tool for Pakistani social-commerce sellers that e
 
 ## Testing
 
-- Sign-up and sign-in flows with mandatory TOTP 2FA are implemented.
+- Sign-up and sign-in flows with optional TOTP 2FA are implemented (offered after sign up; once enabled, a code is required on every sign in).
 - To test sign-up, provide your email and password; no username needed.
 
 ## Build and TypeScript Validation

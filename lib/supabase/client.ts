@@ -9,7 +9,8 @@ export function createClient(): SupabaseClient {
   if (!client) {
     client = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
+      { cookieOptions: { sameSite: "none", secure: true, partitioned: true } }
     );
   }
   return client;

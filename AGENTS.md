@@ -10,7 +10,7 @@ sign up -> set up 2FA -> sign in with 2FA code -> paste chat at /orders/new -> A
 
 ## 2. Stack (fixed, do not change or add alternatives)
 - Next.js App Router + TypeScript (strict) + Tailwind CSS + shadcn/ui
-- Supabase: Postgres, Auth (email + password, mandatory TOTP 2FA)
+- Supabase: Postgres, Auth (email + password, optional TOTP 2FA that is enforced once enabled)
 - zod for all validation (client and server)
 - LLM: one hosted model, called server-side only from /api/parse. The model is not fixed in advance: use whichever provider key is present in Secrets (OPENAI_API_KEY, GEMINI_API_KEY or ANTHROPIC_API_KEY) and read the model name from the AI_MODEL env var. Keep all provider-specific code in lib/ai/ so switching models changes one file. Never hardcode a model name anywhere else.
 - Hosting: the builder's built-in preview/deploy. Use Vercel only if explicitly asked.
@@ -44,7 +44,7 @@ Put all SQL in supabase/schema.sql.
 
 ## 6. Features and pages
 Build only what is listed. Every page needs loading, empty and error states.
-1. Auth: sign up, sign in, sign out, mandatory TOTP 2FA (QR code + verify after sign up, code challenge on every sign in, component components/MfaSetup.tsx). Middleware protects every route except sign in and sign up.
+1. Auth: sign up, sign in, sign out, optional TOTP 2FA (QR code + verify offered after sign up with a "Skip for now" option; once an account turns it on, the code is required on every sign in; component components/MfaSetup.tsx). Pages are protected client-side by components/auth-guard.tsx (wraps app/(app)/layout.tsx and the setup/verify pages); do not add auth middleware. Auth transport: the builder preview proxy strips cookies and Authorization headers before they reach the server, so the server never reads the session from cookies. Database reads and writes go from the browser straight to Supabase with RLS. Server routes that need the user (for example /api/parse) are called with apiFetch() from lib/api.ts, which puts the access token in the JSON body, and they validate it with getAccessToken() + requireUser() from lib/supabase/server.ts.
 2. Layout: mobile-first sidebar or bottom nav: Dashboard, New Order, Orders, Dispatch, Khata, Sign out.
 3. /orders/new: paste chat -> parse -> review card -> confirm -> save.
 4. /orders: list of the user's orders (customer, area, total, status, date) and a details page with delivered/cancelled actions.
