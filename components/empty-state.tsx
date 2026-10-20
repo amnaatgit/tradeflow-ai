@@ -7,11 +7,11 @@ import {
 } from "./ui/card";
 
 export function EmptyState({
-  title,
-  description,
+  title = "Nothing here yet",
+  description = "This section is ready for the next phase of development.",
 }: {
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
 }) {
   return (
     <Card>

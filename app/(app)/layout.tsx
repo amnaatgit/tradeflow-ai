@@ -1,18 +1,6 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import type { ReactNode } from "react";
 import { NavShell } from "@/components/nav-shell";
 
-export default async function AppLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.getUser();
-
-  if (error || !data.user) {
-    redirect("/auth/sign-in");
-  }
-
+export default function AppLayout({ children }: { children: ReactNode }) {
   return <NavShell>{children}</NavShell>;
 }

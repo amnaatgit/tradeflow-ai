@@ -1,20 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { SignOutButton } from "./sign-out-button";
 import { createClient } from "../lib/supabase/client";
-
-const supabase = createClient();
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "./ui/card";
 
 interface MfaEnrollResponse {
   id: string;
@@ -26,8 +24,7 @@ interface MfaEnrollResponse {
   };
 }
 
-export default function MfaSetup() {
-  const router = useRouter();
+export function MfaSetup() {
   const [factor, setFactor] = useState<MfaEnrollResponse | null>(null);
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,6 +33,14 @@ export default function MfaSetup() {
   async function startEnroll() {
     setLoading(true);
     setError(null);
+    const supabase = createClient();
+    // Remove leftover unverified factors from an earlier, abandoned setup.
+    const { data: existing } = await supabase.auth.mfa.listFactors();
+    for (const f of existing?.all ?? []) {
+      if (f.status === "unverified") {
+        await supabase.auth.mfa.unenroll({ factorId: f.id });
+      }
+    }
     const { data, error } = await supabase.auth.mfa.enroll({
       factorType: "totp",
       friendlyName: "TradeFlow AI",
@@ -54,6 +59,7 @@ export default function MfaSetup() {
     if (!factor) return;
     setLoading(true);
     setError(null);
+    const supabase = createClient();
 
     const { data: challenge, error: challengeError } =
       await supabase.auth.mfa.challenge({ factorId: factor.id });
@@ -76,8 +82,7 @@ export default function MfaSetup() {
       return;
     }
 
-    router.push("/dashboard");
-    router.refresh();
+    window.location.assign("/dashboard");
   }
 
   if (!factor) {
@@ -97,8 +102,11 @@ export default function MfaSetup() {
             </p>
           )}
           <Button onClick={startEnroll} disabled={loading} className="w-full">
-            {loading ? "Preparing QR code" : "Show QR code"}
+            {loading ? "Preparing QR code" : "Show QR code"}
           </Button>
+          <div className="mt-4 flex justify-center">
+            <SignOutButton />
+          </div>
         </CardContent>
       </Card>
     );
@@ -119,11 +127,17 @@ export default function MfaSetup() {
             {error}
           </p>
         )}
-        <div
-          className="mx-auto mb-6 flex h-48 w-48 items-center justify-center rounded-md border bg-white p-2"
-          // Supabase returns a trusted SVG QR code.
-          dangerouslySetInnerHTML={{ __html: factor.totp.qr_code }}
-        />
+        <div className="mx-auto mb-4 flex h-48 w-48 items-center justify-center rounded-md border bg-white p-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={factor.totp.qr_code}
+            alt="Scan this QR code with your authenticator app"
+            className="h-full w-full"
+          />
+        </div>
+        <p className="mb-6 break-all text-center text-xs text-muted-foreground">
+          Can&apos;t scan? Enter this key manually: <span className="font-mono">{factor.totp.secret}</span>
+        </p>
         <form onSubmit={verify} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="code">6-digit code</Label>
@@ -140,10 +154,15 @@ export default function MfaSetup() {
             />
           </div>
           <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "Verifying" : "Verify and continue"}
+            {loading ? "Verifying" : "Verify and continue"}
           </Button>
         </form>
+        <div className="mt-4 flex justify-center">
+          <SignOutButton />
+        </div>
       </CardContent>
     </Card>
   );
 }
+
+export default MfaSetup;

@@ -1,23 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { SignOutButton } from "./sign-out-button";
 import { createClient } from "../lib/supabase/client";
-
-const supabase = createClient();
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "./ui/card";
 
 export function MfaVerify() {
-  const router = useRouter();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +23,7 @@ export function MfaVerify() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    const supabase = createClient();
 
     const { data: factors, error: factorsError } =
       await supabase.auth.mfa.listFactors();
@@ -64,8 +62,7 @@ export function MfaVerify() {
       return;
     }
 
-    router.push("/dashboard");
-    router.refresh();
+    window.location.assign("/dashboard");
   }
 
   return (
@@ -98,10 +95,15 @@ export function MfaVerify() {
             />
           </div>
           <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "Verifying" : "Verify"}
+            {loading ? "Verifying" : "Verify"}
           </Button>
         </form>
+        <div className="mt-4 flex justify-center">
+          <SignOutButton />
+        </div>
       </CardContent>
     </Card>
   );
 }
+
+export default MfaVerify;
