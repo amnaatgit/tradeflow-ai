@@ -39,10 +39,15 @@ Environment variables (see `.env.example`)
 - AI_MODEL — optional override for the model name used by the server
 
 How the AI step works
-- The client sends the raw chat text to POST /api/parse (access token placed in the request body by the client helper). The server authenticates the token with getAccessToken(req, body) + requireUser() and then calls the Generative Language API (configured in lib/ai/).
-- The model is asked to return structured JSON and the server requests JSON output. The raw model output (including confidence scores) is validated with zod and the server will retry parsing invalid JSON a small number of times before returning a friendly error.
+- The client sends the raw chat text and optional media to POST /api/parse (access token placed in the request body by the client helper). The server authenticates the token with getAccessToken(req, body) + requireUser() and then calls the Generative Language API (configured in lib/ai/).
+- The model is asked to return structured JSON and the server requests JSON output (responseMimeType = "application/json"). When media is provided (screenshots or voice notes) the request includes the file inline as base64 data, and the AI returns a transcript field describing what it read or heard.
+- The model chain includes fallback models configured in lib/ai/config.ts; the server retries an alternate model once when the chosen model is not found and handles transient errors with a retry policy.
+- The raw model output (including per-field confidence scores) is validated with zod and the server will retry parsing invalid JSON a small number of times before returning a friendly error.
 - The review screen highlights fields that are null or whose confidence is below 0.7 in yellow. Nothing is saved until the seller presses Confirm & save.
 - Money math (totals, balance calculations) is always computed in code via lib/calc.ts — never trusted from the model.
+
+How AI-written WhatsApp drafts work
+- The app provides /api/draft which generates short editable WhatsApp message drafts (confirmation or reminder). The server calls the same model chain and returns a validated { message } JSON. Sellers edit and send messages manually; the API does not send messages.
 
 Code gigs
 - gigs/order-parsing — self-contained order parser gig (AI prompt, zod schema, Gemini call and retries).

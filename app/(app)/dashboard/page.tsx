@@ -6,89 +6,98 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { totalFromItems, customerBalance } from "@/lib/calc";
+import { cn } from "@/lib/utils";
+
+type LatestOrder = {
+  id: string;
+  created_at: string;
+  status: string;
+  area: string | null;
+  customers: { name: string | null; phone: string | null } | null;
+  order_items: { qty: number; unit_price: number }[];
+};
 
 function formatMoney(n: number) {
   return "Rs " + n.toLocaleString("en-IN");
 }
 
+const badge: Record<string, string> = {
+  pending: "bg-yellow-100 text-yellow-800",
+  delivered: "bg-green-100 text-green-800",
+  cancelled: "bg-gray-200 text-gray-700",
+};
+
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [todayOrdersCount, setTodayOrdersCount] = useState(0);
-  const [totalPendingBalance, setTotalPendingBalance] = useState(0);
+  const [todayCount, setTodayCount] = useState(0);
+  const [todaySales, setTodaySales] = useState(0);
+  const [toDispatch, setToDispatch] = useState(0);
+  const [toCollect, setToCollect] = useState(0);
   const [topArea, setTopArea] = useState<string | null>(null);
-  const [latestOrders, setLatestOrders] = useState<any[]>([]);
+  const [latest, setLatest] = useState<LatestOrder[]>([]);
 
   useEffect(() => {
     let mounted = true;
-    setLoading(true);
-    const supabase = createClient();
-
-    Promise.all([
-      // orders today
-      supabase
-        .from("orders")
-        .select("id,created_at")
-        .gte("created_at", new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),
-      // customers (with orders and order_items) + payments for balances
-      supabase.from("customers").select("id,name,phone,area,orders(id,status,advance,order_items(qty,unit_price))"),
-      supabase.from("payments").select("id,customer_id,amount"),
-      // top area by orders in last 30 days
-      supabase
-        .from("orders")
-        .select("area")
-        .gte("created_at", new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString()),
-      // latest 5 orders
-      supabase
-        .from("orders")
-        .select("id,created_at,status,area,customers(name),order_items(qty,unit_price, name)")
-        .order("created_at", { ascending: false })
-        .limit(5),
-    ])
-      .then((results) => {
+    (async () => {
+      const supabase = createClient();
+      const startOfToday = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      try {
+        const [todayRes, pendingRes, customersRes, paymentsRes, areasRes, latestRes] = await Promise.all([
+          supabase
+            .from("orders")
+            .select("id,status,order_items(qty,unit_price)")
+            .gte("created_at", startOfToday)
+            .neq("status", "cancelled"),
+          supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", "pending"),
+          supabase
+            .from("customers")
+            .select("id,orders(id,status,advance,order_items(qty,unit_price))"),
+          supabase.from("payments").select("customer_id,amount"),
+          supabase.from("orders").select("area").gte("created_at", thirtyDaysAgo).neq("status", "cancelled"),
+          supabase
+            .from("orders")
+            .select("id,created_at,status,area,customers(name,phone),order_items(qty,unit_price)")
+            .order("created_at", { ascending: false })
+            .limit(5),
+        ]);
+        for (const r of [todayRes, pendingRes, customersRes, paymentsRes, areasRes, latestRes]) {
+          if (r.error) throw r.error;
+        }
         if (!mounted) return;
-        const [todayRes, customersRes, paymentsRes, areasRes, latestRes] = results;
-        if (todayRes.error) throw todayRes.error;
-        if (customersRes.error) throw customersRes.error;
-        if (paymentsRes.error) throw paymentsRes.error;
-        if (areasRes.error) throw areasRes.error;
-        if (latestRes.error) throw latestRes.error;
 
-        setTodayOrdersCount((todayRes.data || []).length);
+        const today = (todayRes.data || []) as unknown as { order_items: { qty: number; unit_price: number }[] }[];
+        setTodayCount(today.length);
+        setTodaySales(today.reduce((s, o) => s + totalFromItems(o.order_items || []), 0));
+        setToDispatch(pendingRes.count ?? 0);
 
-        // total pending balance: sum of positive customer balances
-        const customers = customersRes.data || [];
         const payments = paymentsRes.data || [];
-        let totalPending = 0;
-        for (const c of customers) {
-          const custOrders = c.orders || [];
-          const custPayments = payments.filter((p: any) => p.customer_id === c.id);
-          const bal = customerBalance(custOrders, custPayments);
-          if (bal > 0) totalPending += bal;
+        let collect = 0;
+        for (const c of (customersRes.data || []) as unknown as { id: string; orders: unknown[] }[]) {
+          const bal = customerBalance(
+            c.orders || [],
+            payments.filter((p) => p.customer_id === c.id)
+          );
+          if (bal > 0) collect += bal;
         }
-        setTotalPendingBalance(totalPending);
+        setToCollect(collect);
 
-        // top area by order count in last 30 days
-        const areas = (areasRes.data || []).map((r: any) => r.area || "No area");
         const counts: Record<string, number> = {};
-        for (const a of areas) counts[a] = (counts[a] || 0) + 1;
-        let top: string | null = null;
-        let topCount = 0;
-        for (const k of Object.keys(counts)) {
-          if (counts[k] > topCount) {
-            topCount = counts[k];
-            top = k;
-          }
+        for (const r of (areasRes.data || []) as { area: string | null }[]) {
+          const a = r.area?.trim() || "No area";
+          counts[a] = (counts[a] || 0) + 1;
         }
-        setTopArea(top);
+        const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+        setTopArea(top ? `${top[0]} (${top[1]})` : null);
 
-        setLatestOrders(latestRes.data || []);
-      })
-      .catch((err) => {
-        setError((err as any)?.message ?? String(err));
-      })
-      .finally(() => mounted && setLoading(false));
-
+        setLatest((latestRes.data || []) as unknown as LatestOrder[]);
+      } catch (err) {
+        if (mounted) setError((err as { message?: string })?.message ?? String(err));
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
     return () => {
       mounted = false;
     };
@@ -107,42 +116,36 @@ export default function DashboardPage() {
       </Card>
     );
 
+  const stats = [
+    { title: "Today's orders", value: String(todayCount), note: formatMoney(todaySales), href: "/orders" },
+    { title: "To dispatch", value: String(toDispatch), note: "pending orders", href: "/dispatch" },
+    { title: "To collect", value: formatMoney(toCollect), note: "from customers", href: "/khata" },
+    { title: "Top area (30 days)", value: topArea ?? "—", note: "by orders", href: "/dispatch" },
+  ];
+
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-4">
+      <div className="flex items-center justify-between gap-2">
         <h1 className="text-2xl font-semibold">Dashboard</h1>
         <Link href="/orders/new">
           <Button>New order</Button>
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Today&apos;s orders</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{todayOrdersCount}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Total pending balance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-semibold">{formatMoney(totalPendingBalance)}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Top area (30d)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg">{topArea ?? "—"}</div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        {stats.map((s) => (
+          <Link key={s.title} href={s.href} className="block">
+            <Card className="h-full transition-colors hover:bg-muted/40">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">{s.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="truncate text-2xl font-semibold">{s.value}</div>
+                <div className="text-xs text-muted-foreground">{s.note}</div>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
       </div>
 
       <Card>
@@ -150,47 +153,43 @@ export default function DashboardPage() {
           <CardTitle>Latest orders</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="divide-y">
-            {latestOrders.length === 0 ? (
-              <div className="p-4 text-center">
-                <div className="mb-2 text-sm text-muted-foreground">No orders yet</div>
-                <Link href="/orders/new">
-                  <Button>New order</Button>
-                </Link>
+          {latest.length === 0 ? (
+            <div className="p-4 text-center">
+              <div className="mb-2 text-sm text-muted-foreground">
+                No orders yet. Paste a customer&apos;s WhatsApp message to create your first one.
               </div>
-            ) : (
-              latestOrders.map((o) => {
-                const customer = o.customers?.name ?? "Unknown";
-                const total = totalFromItems(o.order_items || []);
-                const date = new Date(o.created_at).toLocaleString();
-                const statusColor =
-                  o.status === "pending"
-                    ? "bg-yellow-200 text-yellow-800"
-                    : o.status === "delivered"
-                    ? "bg-green-200 text-green-800"
-                    : "bg-gray-200 text-gray-800";
-                return (
-                  <Link key={o.id} href={`/orders/${o.id}`} className="block py-3">
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <div className="font-medium">{customer}</div>
-                        <div className="text-sm text-muted-foreground">{o.area || "No area"}</div>
+              <Link href="/orders/new">
+                <Button>New order</Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="divide-y">
+              {latest.map((o) => (
+                <Link key={o.id} href={`/orders/${o.id}`} className="block py-3">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="truncate font-medium">
+                        {o.customers?.name || o.customers?.phone || "Unknown customer"}
                       </div>
-                      <div className="text-right">
-                        <div className="text-sm">{formatMoney(total)}</div>
-                        <div className="text-xs text-muted-foreground">{date}</div>
-                      </div>
-                      <div>
-                        <span className={"px-2 py-1 rounded-full text-xs font-medium " + statusColor}>
-                          {o.status}
-                        </span>
-                      </div>
+                      <div className="text-sm text-muted-foreground">{o.area || "No area"}</div>
                     </div>
-                  </Link>
-                );
-              })
-            )}
-          </div>
+                    <div className="text-right">
+                      <div className="text-sm">{formatMoney(totalFromItems(o.order_items || []))}</div>
+                      <div className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleString()}</div>
+                    </div>
+                    <span
+                      className={cn(
+                        "rounded-full px-2 py-1 text-xs font-medium",
+                        badge[o.status] ?? badge.cancelled
+                      )}
+                    >
+                      {o.status.charAt(0).toUpperCase() + o.status.slice(1)}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

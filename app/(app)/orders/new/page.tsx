@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
@@ -68,6 +68,8 @@ function friendlyError(status: number, message: unknown): string {
   if (m === "Enter your 2FA code first") return "Please sign in again and enter your 2FA code.";
   if (m === "Input too long") return `That message is too long (max ${MAX_CHARS} characters).`;
   if (m === "Parsing failed") return "The AI couldn't read this chat. Fill in the order below instead.";
+  if (m === "Unsupported file type") return "That file type isn't supported. Upload a JPG/PNG/WebP image or an MP3/MP4/OGG/AAC/WAV audio file.";
+  if (m === "File too large") return "That file is too large. Try a smaller screenshot or voice note.";
   return m || "Something went wrong while reading the chat. Fill in the order below instead.";
 }
 
@@ -85,17 +87,41 @@ export default function NewOrderPage() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
 
+  // Attachment state
+  const [attachmentName, setAttachmentName] = useState<string | null>(null);
+  const [attachmentMime, setAttachmentMime] = useState<string | null>(null);
+  const [attachmentBase64, setAttachmentBase64] = useState<string | null>(null); // no data: prefix
+  const [attachmentPreview, setAttachmentPreview] = useState<string | null>(null); // data URL for image preview
+  const [attachmentKind, setAttachmentKind] = useState<"image" | "audio" | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
+
+  function clearAttachment() {
+    setAttachmentBase64(null);
+    setAttachmentMime(null);
+    setAttachmentName(null);
+    setAttachmentPreview(null);
+    setAttachmentKind(null);
+    if (imageInputRef.current) imageInputRef.current.value = "";
+    if (audioInputRef.current) audioInputRef.current.value = "";
+  }
+
+
   async function handleParse() {
     setParseError(null);
     setSaveError(null);
     setSavedId(null);
-    if (!chat.trim()) {
-      setParseError("Paste the customer's message first.");
+    if (!chat.trim() && !attachmentBase64) {
+      setParseError("Paste the customer's message first or upload a screenshot/voice note.");
       return;
     }
     setParsing(true);
     try {
-      const res = await apiFetch("/api/parse", { chat });
+      const body: any = { chat };
+      if (attachmentBase64 && attachmentMime) {
+        body.media = { mimeType: attachmentMime, data: attachmentBase64 };
+      }
+      const res = await apiFetch("/api/parse", body);
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
         setAi(null);
@@ -132,6 +158,7 @@ export default function NewOrderPage() {
   }
 
   function reset() {
+    clearAttachment();
     setChat("");
     setAi(null);
     setDraft(null);
@@ -203,11 +230,13 @@ export default function NewOrderPage() {
         customerId = data.id;
       }
 
+      const rawText = chat.trim() || (ai?.transcript ? (attachmentKind === "image" ? `[From screenshot] ${ai.transcript}` : `[From voice note] ${ai.transcript}`) : null);
+
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
           customer_id: customerId,
-          raw_text: chat.trim() || null,
+          raw_text: rawText,
           address: draft.address.trim() || null,
           area,
           advance: advanceNum,
@@ -236,6 +265,7 @@ export default function NewOrderPage() {
       setDraft(null);
       setAi(null);
       setChat("");
+      clearAttachment();
     } catch (err) {
       const message = err && typeof err === "object" && "message" in err ? String((err as { message: unknown }).message) : "";
       setSaveError(`Couldn't save the order${message ? `: ${message}` : ""}. Please try again.`);
@@ -249,7 +279,7 @@ export default function NewOrderPage() {
       <div>
         <h1 className="text-2xl font-semibold">New order</h1>
         <p className="text-sm text-muted-foreground">
-          Paste the customer&apos;s WhatsApp or Instagram message. English, Roman Urdu or mixed is fine.
+          Paste the customer&apos;s message, or upload a chat screenshot or voice note. English, Roman Urdu or mixed is fine.
         </p>
       </div>
 
@@ -282,10 +312,97 @@ export default function NewOrderPage() {
             className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
           <div className="flex flex-wrap items-center gap-2">
+            <input
+              id="upload-image"
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={async (e) => {
+                const f = e.target.files?.[0];
+                if (!f) return;
+                // Validate size (let's allow big but we'll trim by base64 length later)
+                try {
+                  // Draw to canvas with longest side max 1600
+                  const img = await new Promise<HTMLImageElement>((res, rej) => {
+                    const url = URL.createObjectURL(f);
+                    const i = new Image();
+                    i.onload = () => {
+                      URL.revokeObjectURL(url);
+                      res(i);
+                    };
+                    i.onerror = rej;
+                    i.src = url;
+                  });
+                  const max = 1600;
+                  const ratio = Math.min(1, max / Math.max(img.width, img.height));
+                  const cw = Math.round(img.width * ratio);
+                  const ch = Math.round(img.height * ratio);
+                  const canvas = document.createElement("canvas");
+                  canvas.width = cw;
+                  canvas.height = ch;
+                  const ctx = canvas.getContext("2d");
+                  if (!ctx) throw new Error("Canvas not supported");
+                  ctx.drawImage(img, 0, 0, cw, ch);
+                  const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+                  const base = dataUrl.split(",")[1] ?? "";
+                  setAttachmentBase64(base);
+                  setAttachmentMime("image/jpeg");
+                  setAttachmentPreview(dataUrl);
+                  setAttachmentName(f.name);
+                  setAttachmentKind("image");
+                } catch (err) {
+                  setParseError("Couldn't process the image");
+                }
+              }}
+            />
+            <Button type="button" variant="outline" onClick={() => imageInputRef.current?.click()} disabled={parsing || saving}>
+              Upload screenshot
+            </Button>
+
+            <input
+              id="upload-audio"
+              ref={audioInputRef}
+              type="file"
+              accept="audio/*,.opus,.ogg,.m4a,.mp3,.wav,.aac"
+              className="hidden"
+              onChange={async (e) => {
+                const f = e.target.files?.[0];
+                if (!f) return;
+                if (f.size > 3 * 1024 * 1024) {
+                  setParseError("Voice note is too big (max 3 MB)");
+                  return;
+                }
+                try {
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    const result = reader.result as string;
+                    const base = result.split(",")[1] ?? "";
+                    let mime = f.type;
+                    if (!mime) {
+                      const ext = f.name.split(".").pop()?.toLowerCase();
+                      mime = ext === "opus" || ext === "ogg" ? "audio/ogg" : ext === "m4a" ? "audio/mp4" : ext === "mp3" ? "audio/mpeg" : ext === "wav" ? "audio/wav" : ext === "aac" ? "audio/aac" : ext === "webm" ? "audio/webm" : "";
+                    }
+                    setAttachmentBase64(base);
+                    setAttachmentMime(mime || null);
+                    setAttachmentPreview(null);
+                    setAttachmentName(f.name);
+                    setAttachmentKind("audio");
+                  };
+                  reader.readAsDataURL(f);
+                } catch (err) {
+                  setParseError("Couldn't read the audio file");
+                }
+              }}
+            />
+            <Button type="button" variant="outline" onClick={() => audioInputRef.current?.click()} disabled={parsing || saving}>
+              Upload voice note
+            </Button>
+
             <Button onClick={handleParse} disabled={parsing || saving}>
               {parsing ? (
                 <span className="inline-flex items-center">
-                  <LoadingSpinner size={16} />Reading chat…
+                  <LoadingSpinner size={16} />{attachmentKind === "image" ? "Reading screenshot…" : attachmentKind === "audio" ? "Listening to voice note…" : "Reading chat…"}
                 </span>
               ) : (
                 "Read with AI"
@@ -298,6 +415,22 @@ export default function NewOrderPage() {
               {chat.length}/{MAX_CHARS}
             </span>
           </div>
+          {attachmentBase64 && (
+            <div className="flex items-center justify-between gap-3 rounded-md border bg-muted/40 p-2 text-sm">
+              <div className="flex min-w-0 items-center gap-3">
+                {attachmentKind === "image" && attachmentPreview && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={attachmentPreview} alt="Chat screenshot" className="h-16 w-auto rounded object-contain" />
+                )}
+                <span className="truncate">
+                  {attachmentKind === "image" ? "Screenshot" : "Voice note"}: {attachmentName}
+                </span>
+              </div>
+              <Button type="button" variant="ghost" size="sm" onClick={clearAttachment} disabled={parsing}>
+                Remove
+              </Button>
+            </div>
+          )}
           {parseError && (
             <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
               {parseError}
@@ -305,6 +438,17 @@ export default function NewOrderPage() {
           )}
         </CardContent>
       </Card>
+
+      {ai?.transcript && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="mb-1 text-sm font-medium">
+              {attachmentKind === "audio" ? "What the AI heard" : "What the AI read"}
+            </div>
+            <p className="whitespace-pre-wrap rounded-md bg-muted p-3 text-sm text-muted-foreground">{ai.transcript}</p>
+          </CardContent>
+        </Card>
+      )}
 
       {draft && (
         <Card>
@@ -364,6 +508,13 @@ export default function NewOrderPage() {
                 Add item
               </Button>
             </div>
+
+            {ai?.transcript && (
+              <div className="rounded-md bg-muted p-3 text-sm">
+                <div className="text-xs text-muted-foreground">{attachmentKind === "image" ? "What the AI read" : "What the AI heard"}</div>
+                <div className="mt-2 whitespace-pre-wrap">{ai.transcript}</div>
+              </div>
+            )}
 
             <div className="space-y-1 rounded-md bg-muted p-3 text-sm">
               <div className="flex justify-between"><span>Total</span><span className="font-medium">{money(total)}</span></div>

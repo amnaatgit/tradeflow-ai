@@ -7,6 +7,7 @@ export const ItemSchema = z.object({
 });
 
 export const ExtractionSchema = z.object({
+  transcript: z.string().nullable().optional(),
   customer_name: z.string().nullable(),
   phone: z.string().nullable(),
   address: z.string().nullable(),

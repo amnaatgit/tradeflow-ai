@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { totalFromItems, balanceDue } from '@/lib/calc';
 import { copyText } from '@/lib/clipboard';
 import { toWhatsAppNumber } from '@/lib/whatsapp';
+import { AiMessageBox } from '@/components/ai-message-box';
 
 export default function ReceiptPage() {
   const params = useParams();
@@ -28,7 +29,7 @@ export default function ReceiptPage() {
         .select('id,created_at,status,raw_text,address,area,advance,customers(name,phone),order_items(name,qty,unit_price)')
         .eq('id', id)
         .single(),
-      supabase.from('payments').select('id,amount,created_at,order_id').eq('order_id', id),
+      supabase.from('payments').select('id,amount,created_at,order_id,method').eq('order_id', id),
     ])
       .then(([r1, r2]) => {
         if (!mounted) return;
@@ -70,8 +71,8 @@ export default function ReceiptPage() {
     lines.push(`Total: ${formatMoney(total)}`);
     lines.push(`Advance: ${formatMoney(advance)}`);
     lines.push('Payments:');
-    payments.forEach((p) => lines.push(`${new Date(p.created_at).toLocaleDateString()}: ${formatMoney(p.amount)}`));
-    lines.push(`Amount due: ${formatMoney(due)}`);
+    payments.forEach((p) => lines.push(`${new Date(p.created_at).toLocaleDateString()}: ${formatMoney(p.amount)}${p.method ? ` (${p.method})` : ''}`));
+    lines.push(order.status === 'cancelled' ? 'Order CANCELLED. Nothing to collect.' : `Amount due: ${formatMoney(due)}`);
     return lines.join('\n');
   }
 
@@ -114,7 +115,7 @@ export default function ReceiptPage() {
 
   return (
     <div className="p-4">
-      <div className="mb-4 flex gap-2">
+      <div className="mb-4 flex flex-wrap gap-2 print:hidden">
         <Button onClick={() => window.print()}>Print</Button>
         <Button onClick={handleCopy}>Copy WhatsApp text</Button>
         {waPhone && (
@@ -123,6 +124,26 @@ export default function ReceiptPage() {
           </a>
         )}
       </div>
+
+      {order.status !== 'cancelled' && (
+        <div className="mb-4">
+          <AiMessageBox
+            kind="confirmation"
+            title="WhatsApp confirmation (AI)"
+            phone={order.customers?.phone}
+            payload={{
+              customer_name: order.customers?.name ?? null,
+              items: items.map((it: any) => ({ name: it.name, qty: it.qty, unit_price: it.unit_price })),
+              total,
+              advance,
+              paid: paymentsSum,
+              due,
+              address: order.address ?? null,
+            }}
+            fallbackText={buildText()}
+          />
+        </div>
+      )}
 
       <Card>
         <CardHeader>
@@ -133,6 +154,7 @@ export default function ReceiptPage() {
             <h2>TradeFlow AI</h2>
             <div>{new Date(order.created_at).toLocaleString()}</div>
             <div>Order: {order.id.slice(0,8)}</div>
+            {order.status === 'cancelled' && <div className="text-destructive font-bold">CANCELLED</div>}
             <div>Customer: {order.customers?.name || 'Unknown'}</div>
             <div>Phone: {order.customers?.phone || '-'}</div>
             <div>Address: {order.address || '-'}</div>
@@ -162,10 +184,10 @@ export default function ReceiptPage() {
               <div className="text-sm">Payments:</div>
               <ul>
                 {payments.map((p) => (
-                  <li key={p.id}>{new Date(p.created_at).toLocaleDateString()}: {formatMoney(p.amount)}</li>
+                  <li key={p.id}>{new Date(p.created_at).toLocaleDateString()}: {formatMoney(p.amount)}{p.method?` · ${p.method}`:''}</li>
                 ))}
               </ul>
-              <div className="text-lg font-medium">Amount due: {formatMoney(due)}</div>
+              <div className="text-lg font-medium">{order.status === 'cancelled' ? 'Cancelled, nothing to collect' : `Amount due: ${formatMoney(due)}`}</div>
             </div>
 
             {copyFallback && (

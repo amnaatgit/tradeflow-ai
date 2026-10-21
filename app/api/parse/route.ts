@@ -29,12 +29,41 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
 
+    // Accept chat text or media. If media.data starts with data: strip the prefix.
   const chat = typeof body?.chat === "string" ? body.chat.trim() : "";
-  if (!chat) return NextResponse.json({ error: "Empty chat" }, { status: 400 });
-  if (chat.length > 4000) return NextResponse.json({ error: "Input too long" }, { status: 400 });
+  const media = body?.media && typeof body.media === "object" ? body.media : null;
+  let mime: string | null = null;
+  let data: string | null = null;
+  if (media) {
+    mime = typeof media.mimeType === "string" ? media.mimeType : null;
+    data = typeof media.data === "string" ? media.data : null;
+    if (data && data.startsWith("data:")) {
+      const idx = data.indexOf(",");
+      if (idx >= 0) data = data.slice(idx + 1);
+    }
+  }
+
+  if (!chat && !data) return NextResponse.json({ error: "Empty chat" }, { status: 400 });
+  if (chat && chat.length > 4000) return NextResponse.json({ error: "Input too long" }, { status: 400 });
+  if (data && data.length > 4_000_000) return NextResponse.json({ error: "File too large" }, { status: 413 });
+
+  const allowed = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "audio/ogg",
+    "audio/mpeg",
+    "audio/mp4",
+    "audio/aac",
+    "audio/wav",
+    "audio/webm",
+  ];
+  if (data && (!mime || !allowed.includes(mime))) {
+    return NextResponse.json({ error: "Unsupported file type" }, { status: 400 });
+  }
 
   try {
-    const res = await parseOrder(chat);
+    const res = await parseOrder(chat, data ? { mimeType: mime as string, data } : undefined);
     if (!res.success) {
       return NextResponse.json({ error: "Parsing failed", details: res.error, raw: res.raw }, { status: 500 });
     }

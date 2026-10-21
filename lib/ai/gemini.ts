@@ -1,56 +1,60 @@
-import { MODEL, FALLBACK_MODEL } from "./config";
+import { MODEL, FALLBACK_MODELS } from "./config";
 
 const BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+const TRANSIENT = [429, 500, 503];
 
-function call(model: string, system: string, user: string, apiKey: string) {
+// An image or audio file sent inline with the prompt (base64, no "data:" prefix).
+export type Media = { mimeType: string; data: string };
+
+type GeminiResponse = {
+  error?: { message?: string };
+  candidates?: { content?: { parts?: { text?: string }[] } }[];
+};
+
+function call(model: string, system: string, user: string, apiKey: string, media?: Media) {
+  const parts: Record<string, unknown>[] = [];
+  if (media) parts.push({ inlineData: { mimeType: media.mimeType, data: media.data } });
+  parts.push({ text: user });
   return fetch(`${BASE}/${model}:generateContent`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: system }] },
-      contents: [{ role: "user", parts: [{ text: user }] }],
+      contents: [{ role: "user", parts }],
       generationConfig: { responseMimeType: "application/json", maxOutputTokens: 4096 },
     }),
   });
 }
 
-// One Gemini generateContent call. Returns the model's text (JSON as a string).
-export async function generate(system: string, user: string): Promise<string> {
+// One Gemini generateContent call, optionally with an image or audio file.
+// If a model is busy (429/500/503) or retired (404), the next model in
+// FALLBACK_MODELS is tried after a short pause. Returns the model's text (JSON as a string).
+export async function generate(system: string, user: string, media?: Media): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
 
-  // First try the configured model
-  let res = await call(MODEL, system, user, apiKey);
+  const models = [MODEL, ...FALLBACK_MODELS.filter((m) => m !== MODEL)];
+  let res: Response | null = null;
+  let json: GeminiResponse = {};
 
-  // If model not found (retired/renamed) try the fallback once
-  if (res.status === 404) {
-    res = await call(FALLBACK_MODEL, system, user, apiKey);
-    if (res.status === 404) {
-      throw new Error(`Model not found: ${MODEL} and fallback ${FALLBACK_MODEL}`);
-    }
+  for (let i = 0; i < models.length; i++) {
+    if (i > 0) await new Promise((r) => setTimeout(r, 300 * i));
+    res = await call(models[i], system, user, apiKey, media);
+    json = (await res.json().catch(() => ({}))) as GeminiResponse;
+    if (res.ok) break;
+    // Server-side log only (never sent to the browser).
+    console.error(`[gemini] ${models[i]} ${res.status} ${json?.error?.message ?? ""}`.slice(0, 300));
+    if (res.status !== 404 && !TRANSIENT.includes(res.status)) break;
   }
 
-  // If we still have an error status that's transient, and we haven't tried fallback yet, attempt fallback once
-  const transientStatuses = [429, 500, 503];
-  if (!res.ok && transientStatuses.includes(res.status)) {
-    // try fallback once if we haven't already
-    if (res.url?.includes(MODEL)) {
-      res = await call(FALLBACK_MODEL, system, user, apiKey);
-    }
+  if (!res || !res.ok) {
+    const status = res?.status ?? 0;
+    if (status === 404) throw new Error(`Model not found: ${models.join(", ")}`);
+    if (TRANSIENT.includes(status)) throw new Error("The AI is busy right now. Try again in a minute");
+    throw new Error(`Gemini error ${status}: ${json?.error?.message ?? "unknown"}`);
   }
 
-  const json: any = await res.json().catch(() => ({}));
-
-  if (!res.ok) {
-    // For final transient server errors, give a friendly busy message
-    if (transientStatuses.includes(res.status)) {
-      throw new Error("The AI is busy right now. Try again in a minute");
-    }
-    // Other errors
-    throw new Error(`Gemini error ${res.status}: ${json?.error?.message ?? "unknown"}`);
-  }
-
-  const parts: { text?: string }[] = json?.candidates?.[0]?.content?.parts ?? [];
+  const parts = json?.candidates?.[0]?.content?.parts ?? [];
   const text = parts.map((p) => p.text ?? "").join("");
   if (!text) throw new Error("Gemini returned no text");
   return text;

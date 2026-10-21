@@ -1,12 +1,15 @@
-import { generate } from "./gemini";
+import { generate, type Media } from "./gemini";
 import { ExtractionSchema, type Extraction } from "../schema";
 
 const systemPrompt = `You read one customer's order chat sent to a Pakistani online seller (WhatsApp or Instagram). The chat may be in English, Roman Urdu (Urdu in Latin letters) or a mix.
+
+When an image or audio file is attached, the order is in that file. Also return transcript: the customer's words as plain text in Latin letters (Roman Urdu or English).
 
 Return only one JSON object with exactly these keys:
 customer_name (string or null), phone (string or null), address (string or null), area (string or null),
 items (array of { "name": string, "qty": whole number, "unit_price": number or null }),
 advance (number or null),
+transcript (string or null),
 confidence: { "customer_name", "phone", "address", "items", "advance" }, each a number from 0 to 1.
 
 Rules:
@@ -17,32 +20,49 @@ Rules:
 - advance is money the customer already paid or sent (diya, bhej diya, transfer kar diya, paid, advance). A price is not an advance. Cash on delivery means advance is null.
 - address is the delivery address as written. area is only the locality from it (for example "Gulshan block 5", "DHA Phase 6", "Johar Town").
 - phone: copy the digits as written.
+- If a delivery charge is explicitly mentioned ("delivery 250", "DC 200", "delivery charges 150"), add an item named "Delivery charges" with qty 1 and that unit_price.
+- For image screenshots: read the customer's messages from the screenshot (WhatsApp or Instagram). Use the seller's replies only when they confirm a price or quantity. Ignore the status bar, times and read ticks.
+- For audio voice notes: listen to the entire file (Urdu, Roman Urdu or English) and transcribe into Latin letters. Return the transcript string.
 - confidence: 0.9 or more when clearly stated, 0.4 to 0.7 when you had to guess or the text is ambiguous, 0 when the value is null.
 - If the text is not an order, return every field null, items [] and every confidence 0.
 
 Example 1 (Roman Urdu)
 Chat: "Assalam o alaikum, Ali bol raha hun. 2 darjan chai cups aur 3 spoons chahiye, cup 150 ka. Address house 123, Shadman phase 2, Lahore. Number 0300-1234567. 500 advance bhej diya hai"
-JSON: {"customer_name":"Ali","phone":"0300-1234567","address":"house 123, Shadman phase 2, Lahore","area":"Shadman phase 2","items":[{"name":"chai cups","qty":24,"unit_price":150},{"name":"spoons","qty":3,"unit_price":null}],"advance":500,"confidence":{"customer_name":0.9,"phone":0.95,"address":0.95,"items":0.75,"advance":0.9}}
+JSON: {"customer_name":"Ali","phone":"0300-1234567","address":"house 123, Shadman phase 2, Lahore","area":"Shadman phase 2","items":[{"name":"chai cups","qty":24,"unit_price":150},{"name":"spoons","qty":3,"unit_price":null}],"advance":500,"transcript":null,"confidence":{"customer_name":0.9,"phone":0.95,"address":0.95,"items":0.75,"advance":0.9}}
 
 Example 2 (English)
 Chat: "Hi, I want 1 black abaya size L for 3500 and 2 hijabs 450 each. Deliver to Flat 4B, Block 13-D, Gulshan-e-Iqbal, Karachi. Cash on delivery. Sara 0321 7654321"
-JSON: {"customer_name":"Sara","phone":"0321 7654321","address":"Flat 4B, Block 13-D, Gulshan-e-Iqbal, Karachi","area":"Gulshan-e-Iqbal","items":[{"name":"black abaya (L)","qty":1,"unit_price":3500},{"name":"hijab","qty":2,"unit_price":450}],"advance":null,"confidence":{"customer_name":0.85,"phone":0.95,"address":0.95,"items":0.95,"advance":0}}`;
+JSON: {"customer_name":"Sara","phone":"0321 7654321","address":"Flat 4B, Block 13-D, Gulshan-e-Iqbal, Karachi","area":"Gulshan-e-Iqbal","items":[{"name":"black abaya (L)","qty":1,"unit_price":3500},{"name":"hijab","qty":2,"unit_price":450}],"advance":null,"transcript":null,"confidence":{"customer_name":0.85,"phone":0.95,"address":0.95,"items":0.95,"advance":0}}`;
 
 function stripFences(text: string): string {
   return text.replace(/^\s*```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "").trim();
 }
 
-// Calls the model and validates its JSON with zod. Up to 2 retries on invalid output.
-export async function parseOrder(chat: string) {
-  const base = `Chat: ${JSON.stringify(chat)}\nJSON:`;
+// Calls the model (with the screenshot or voice note when given) and validates
+// its JSON with zod. Up to 2 retries on invalid output; the file is sent every time.
+export async function parseOrder(chat: string, media?: Media) {
+  const text = chat.trim();
+  let base: string;
+  if (media?.mimeType.startsWith("image/")) {
+    base =
+      "The order chat is in the attached screenshot (WhatsApp or Instagram). Read the customer's messages. Use the seller's replies only when they confirm a price or quantity. Ignore the status bar, times and read ticks. Put the customer's messages, one per line, in transcript.";
+  } else if (media?.mimeType.startsWith("audio/")) {
+    base =
+      "The order is in the attached voice note (Urdu, Roman Urdu or English speech). Listen to all of it and write names, items and the address in Latin letters. Put what the customer said in transcript.";
+  } else {
+    base = `Chat: ${JSON.stringify(text)}`;
+  }
+  if (media && text) base += `\nExtra note from the seller: ${JSON.stringify(text)}`;
+  base += "\nJSON:";
+
   let user = base;
   let raw: unknown = null;
   let lastError: unknown = null;
 
   for (let attempt = 0; attempt < 3; attempt++) {
-    const text = await generate(systemPrompt, user);
+    const out = await generate(systemPrompt, user, media);
     try {
-      raw = JSON.parse(stripFences(text));
+      raw = JSON.parse(stripFences(out));
       const data: Extraction = ExtractionSchema.parse(raw);
       return { success: true as const, data, raw };
     } catch (err) {

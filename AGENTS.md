@@ -79,6 +79,14 @@ README.md  SPEC.md  AI_DISCLOSURE.md  AGENTS.md  .env.example
 Agents skills folder:
 - .agents/skills/order-parsing/SKILL.md
 - .agents/skills/supabase-rls/SKILL.md
+
+## 9. Agent rules additions
+- Use lib/phone.ts normalizePhone for every phone saved.
+- All money calculations must use lib/calc.ts helpers; do not compute totals from AI output directly.
+- Every API route that requires the user must call getAccessToken(req, body) + requireUser() and enforce the optional-2FA rule when relevant.
+- All AI model calls must go through lib/ai/gemini.ts.
+
+Skills directory for agents (see .agents/skills)
 ```
 Commands: npm install, npm run dev, npm run build (must pass before deploy), npm run lint.
 Env vars (.env.example, no real values): NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, AI_MODEL, and one server-only AI key (OPENAI_API_KEY, GEMINI_API_KEY or ANTHROPIC_API_KEY).

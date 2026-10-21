@@ -2,7 +2,7 @@
 
 ## Product AI
 
-Provider: Google Gemini (Generative Language API) called via the server route /api/parse. The model names are defined in lib/ai/config.ts (DEFAULT_MODEL and FALLBACK_MODEL). The server requests JSON output (generationConfig.responseMimeType = "application/json") and includes the API key in the x-goog-api-key header. The AI only performs structured field extraction (with per-field confidence scores); extracted data is shown to the seller for review and nothing is saved until the seller confirms.
+Provider: Google Gemini (Generative Language API) called via the server route /api/parse. The model names are defined in lib/ai/config.ts (DEFAULT_MODEL and FALLBACK_MODEL). The /api/draft route writes short WhatsApp message drafts from the order numbers only; the seller edits and sends them manually. The server requests JSON output (generationConfig.responseMimeType = "application/json") and includes the API key in the x-goog-api-key header. The AI only performs structured field extraction (with per-field confidence scores); extracted data is shown to the seller for review and nothing is saved until the seller confirms. Screenshots and voice notes are sent to Gemini as inline data in the request; the media itself is not stored on the server — only the extracted order and transcript are saved after the seller confirms.
 
 ## Development AI
 

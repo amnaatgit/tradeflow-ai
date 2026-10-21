@@ -143,7 +143,7 @@ export default function OrdersPage() {
                     </div>
                     <div>
                       <span className={cn("px-2 py-1 rounded-full text-xs font-medium", statusColor)}>
-                        {o.status}
+                        {o.status.charAt(0).toUpperCase() + o.status.slice(1)}
                       </span>
                     </div>
                   </div>
