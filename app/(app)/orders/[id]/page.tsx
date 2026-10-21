@@ -39,24 +39,25 @@ export default function OrderDetail() {
     let mounted = true;
     setLoading(true);
     const supabase = createClient();
-    Promise.all([
-      supabase
-        .from("orders")
-        .select(
-          `id,created_at,status,raw_text,address,area,advance,customers(name,phone),order_items(id,qty,unit_price,name)`
-        )
-        .eq("id", id)
-        .single(),
-      supabase.from('payments').select('amount').eq('order_id', id),
-    ])
-      .then(([res, pRes]) => {
+    (async () => {
+      try {
+        const [res, pRes] = await Promise.all([
+          supabase
+            .from("orders")
+            .select(
+              `id,created_at,status,raw_text,address,area,advance,customers(name,phone),order_items(id,qty,unit_price,name)`
+            )
+            .eq("id", id)
+            .single(),
+          supabase.from('payments').select('amount').eq('order_id', id),
+        ]);
         if (!mounted) return;
         if (res.error) {
           setError(res.error.message);
         } else if (!res.data) {
           setOrder(null);
         } else {
-          setOrder(res.data as Order);
+          setOrder(res.data as unknown as Order);
         }
         if (pRes.error) {
           throw pRes.error;
@@ -64,9 +65,13 @@ export default function OrderDetail() {
           const sum = (pRes.data || []).reduce((s: number, p: any) => s + (p.amount || 0), 0);
           setPaymentsSum(sum);
         }
-      })
-      .catch((err) => setError((err as any)?.message ?? String(err)))
-      .finally(() => mounted && setLoading(false));
+      } catch (err) {
+        if (!mounted) return;
+        setError((err as any)?.message ?? String(err));
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
     return () => {
       mounted = false;
     };
@@ -91,7 +96,7 @@ export default function OrderDetail() {
         .eq("id", id)
         .single();
       if (e2) setError(e2.message);
-      else setOrder(data as Order);
+      else setOrder(data as unknown as Order);
     }
   }
 

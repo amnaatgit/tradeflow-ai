@@ -39,18 +39,23 @@ export default function DispatchPage() {
       .eq("status", "pending")
       .order("created_at", { ascending: false });
 
-    query
-      .then((res) => {
+    (async () => {
+      try {
+        const res = await query;
         if (!mounted) return;
         if (res.error) {
           setError(res.error.message);
           setOrders([]);
         } else {
-          setOrders(res.data as Order[]);
+          setOrders(res.data as unknown as Order[]);
         }
-      })
-      .catch((err) => setError((err as any)?.message ?? String(err)))
-      .finally(() => mounted && setLoading(false));
+      } catch (err) {
+        if (!mounted) return;
+        setError((err as any)?.message ?? String(err));
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
 
     return () => {
       mounted = false;

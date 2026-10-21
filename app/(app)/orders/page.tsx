@@ -31,21 +31,26 @@ export default function OrdersPage() {
     let mounted = true;
     setLoading(true);
     const supabase = createClient();
-    supabase
-      .from("orders")
-      .select(`id,created_at,status,area,customers(name),order_items(qty,unit_price)`)
-      .order("created_at", { ascending: false })
-      .then((res) => {
+    (async () => {
+      try {
+        const res = await supabase
+          .from("orders")
+          .select(`id,created_at,status,area,customers(name),order_items(qty,unit_price)`)
+          .order("created_at", { ascending: false });
         if (!mounted) return;
         if (res.error) {
           setError(res.error.message);
           setOrders([]);
         } else {
-          setOrders(res.data as OrderRow[]);
+          setOrders(res.data as unknown as OrderRow[]);
         }
-      })
-      .catch((err) => setError(String(err)))
-      .finally(() => mounted && setLoading(false));
+      } catch (err) {
+        if (!mounted) return;
+        setError(String(err));
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
     return () => {
       mounted = false;
     };
