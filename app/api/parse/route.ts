@@ -11,6 +11,10 @@ export async function POST(req: Request) {
   const token = getAccessToken(req, body);
   const userRes = await requireUser(token);
   if (!userRes) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // enforce server-side 2FA: if account has a verified factor but AAL is not aal2
+  if (userRes.user.factors?.some((f: any) => f.status === "verified") && userRes.aal !== "aal2") {
+    return NextResponse.json({ error: "Enter your 2FA code first" }, { status: 403 });
+  }
   const userId = userRes.user.id;
 
   const now = Date.now();

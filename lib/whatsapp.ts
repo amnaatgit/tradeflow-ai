@@ -1,19 +1,16 @@
+import { normalizePhone } from "./phone";
+
 export function toWhatsAppNumber(phone: string): string | null {
   if (!phone) return null;
-  const digits = phone.replace(/[^0-9+]/g, "");
-  // remove leading + if present
-  const cleaned = digits.replace(/^\+/, "");
-  // if starts with 0, replace with 92
-  let result = cleaned;
-  if (/^0/.test(cleaned)) {
-    result = '92' + cleaned.replace(/^0+/, '');
+  const n = normalizePhone(phone);
+  if (!n) return null;
+  // n should be digits-only or 0-prefixed local
+  const digits = n.replace(/^\+/, "");
+  // if starts with 0 and is 11 digits like 03001234567 -> convert to 92...
+  if (/^0\d{10}$/.test(digits)) {
+    return "92" + digits.slice(1);
   }
-  // if starts with 92 already, keep
-  if (/^92/.test(result)) {
-    // ok
-  }
-  // ensure only digits
-  result = result.replace(/\D/g, '');
-  if (result.length < 11) return null;
-  return result;
+  // if already 11-15 digits (e.g. 92300...) return as-is
+  if (/^\d{11,15}$/.test(digits)) return digits;
+  return null;
 }

@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { normalizePhone } from "@/lib/phone";
 
 type ItemRow = { name: string; qty: string; unit_price: string };
 type Draft = {
@@ -64,6 +65,7 @@ function friendlyError(status: number, message: unknown): string {
   if (status === 401) return "Your session has expired. Please sign in again.";
   if (status === 429) return "Too many requests. Wait a minute and try again.";
   if (m === "Empty chat") return "Paste the customer's message first.";
+  if (m === "Enter your 2FA code first") return "Please sign in again and enter your 2FA code.";
   if (m === "Input too long") return `That message is too long (max ${MAX_CHARS} characters).`;
   if (m === "Parsing failed") return "The AI couldn't read this chat. Fill in the order below instead.";
   return m || "Something went wrong while reading the chat. Fill in the order below instead.";
@@ -176,8 +178,17 @@ export default function NewOrderPage() {
     try {
       const supabase = createClient();
       const name = draft.customer_name.trim();
-      const phone = draft.phone.trim() || null;
+      const rawPhone = draft.phone.trim() || null;
       const area = draft.area.trim() || null;
+      // normalize phone so lookups match
+      let phone: string | null = null;
+      if (rawPhone) {
+        try {
+          phone = normalizePhone(rawPhone);
+        } catch (e) {
+          phone = rawPhone;
+        }
+      }
 
       // Reuse the customer with the same phone, otherwise create one. RLS keeps this per user.
       let customerId: string | null = null;

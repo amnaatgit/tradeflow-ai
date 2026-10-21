@@ -19,9 +19,13 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [createdFlash, setCreatedFlash] = useState<string | null>(null);
 
   useEffect(() => {
     setReady(true);
+    // show flash when redirected after account creation
+    const created = new URLSearchParams(window.location.search).get("created");
+    if (created === "1") setCreatedFlash("Account created. Sign in to continue.");
   }, []);
 
   async function onSubmit(e: React.FormEvent) {
@@ -55,7 +59,10 @@ export default function SignInPage() {
         <CardDescription>Sign in with your email and password.</CardDescription>
       </CardHeader>
       <CardContent>
-        {error && (
+        {createdFlash && (
+          <p className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-800">{createdFlash}</p>
+        )}
+      {error && (
           <p className="mb-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
             {error}
           </p>
