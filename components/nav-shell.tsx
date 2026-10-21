@@ -38,6 +38,7 @@ export function NavShell({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen flex-col">
       <nav className="border-b">
         <div className="container mx-auto flex h-14 items-center gap-1 overflow-x-auto whitespace-nowrap px-4">
+          <Link href="/dashboard" className="mr-3 text-sm font-bold text-primary">TradeFlow AI</Link>
           <NavLink href="/dashboard">Dashboard</NavLink>
           <NavLink href="/orders/new">New Order</NavLink>
           <NavLink href="/orders">Orders</NavLink>

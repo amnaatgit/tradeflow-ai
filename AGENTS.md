@@ -73,12 +73,15 @@ Out of scope: payment gateways, courier APIs, realtime subscriptions, PDF librar
 /components     UI components (MfaSetup, OrderReviewCard, ...)
 /lib            supabase clients, calc.ts, schema.ts, ai/parse.ts
 /supabase       schema.sql (tables, indexes, RLS)
-/gigs           two standalone reusable modules, each with its own README
+/gigs           four standalone reusable modules (published as code gigs), each with its own README
 README.md  SPEC.md  AI_DISCLOSURE.md  AGENTS.md  .env.example
 
 Agents skills folder:
 - .agents/skills/order-parsing/SKILL.md
+- .agents/skills/ai-media-parsing/SKILL.md
+- .agents/skills/whatsapp-drafts/SKILL.md
 - .agents/skills/supabase-rls/SKILL.md
+(SKILLS.md at the repo root lists them with when to use each one.)
 
 ## 9. Agent rules additions
 - Use lib/phone.ts normalizePhone for every phone saved.

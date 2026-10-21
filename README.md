@@ -49,11 +49,12 @@ How the AI step works
 How AI-written WhatsApp drafts work
 - The app provides /api/draft which generates short editable WhatsApp message drafts (confirmation or reminder). The server calls the same model chain and returns a validated { message } JSON. Sellers edit and send messages manually; the API does not send messages.
 
-Code gigs
-- gigs/order-parsing — self-contained order parser gig (AI prompt, zod schema, Gemini call and retries).
-
-Code gigs
-- gigs/order-parsing — self-contained order parser gig (AI prompt, zod schema, Gemini call and retries).
+Code gigs (published on Devmarketplace, code in /gigs)
+- Roman Urdu Order Parser: text, screenshot or voice note to order JSON (gigs/order-parser-gemini) — https://beta.devmarketplace.com/gig/db26e455-e122-4342-88ed-1987e2c968d7
+- Supabase Auth + 2FA Kit for Next.js (gigs/supabase-auth-2fa-kit) — https://beta.devmarketplace.com/gig/51e50d6c-728e-49a5-b0b1-aa03bade75d3
+- AI WhatsApp Message Drafts in Roman Urdu, Urdu or English (gigs/ai-whatsapp-drafts) — https://beta.devmarketplace.com/gig/4aa788ac-0be1-4986-9840-4af85dddfb0e
+- PK Seller Toolkit: phones, WhatsApp links, PKR, khata math (gigs/pk-commerce-utils) — https://beta.devmarketplace.com/gig/f6bed826-8e6b-43fd-a509-44df05a1bda7
+- gigs/order-parsing and gigs/supabase-auth-2fa are the earlier first versions, kept for history.
 
 Links
 - AGENTS.md — instructions for coding agents and hard rules
