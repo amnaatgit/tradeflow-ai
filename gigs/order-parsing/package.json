@@ -1,0 +1,10 @@
+{
+  "name": "gigs-order-parsing",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.ts",
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^3.23.0"
+  }
+}

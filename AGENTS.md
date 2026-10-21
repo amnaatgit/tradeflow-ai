@@ -75,6 +75,10 @@ Out of scope: payment gateways, courier APIs, realtime subscriptions, PDF librar
 /supabase       schema.sql (tables, indexes, RLS)
 /gigs           two standalone reusable modules, each with its own README
 README.md  SPEC.md  AI_DISCLOSURE.md  AGENTS.md  .env.example
+
+Agents skills folder:
+- .agents/skills/order-parsing/SKILL.md
+- .agents/skills/supabase-rls/SKILL.md
 ```
 Commands: npm install, npm run dev, npm run build (must pass before deploy), npm run lint.
 Env vars (.env.example, no real values): NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, AI_MODEL, and one server-only AI key (OPENAI_API_KEY, GEMINI_API_KEY or ANTHROPIC_API_KEY).

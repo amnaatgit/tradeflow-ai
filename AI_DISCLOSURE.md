@@ -2,11 +2,11 @@
 
 ## Product AI
 
-Provider: Google Gemini. Model is configured in lib/ai/config.ts (DEFAULT_MODEL = "gemini-3.1-flash-lite", FALLBACK_MODEL = "gemini-flash-latest", and the effective MODEL is process.env.AI_MODEL || DEFAULT_MODEL).
+Provider: Google Gemini (Generative Language API) called via the server route /api/parse. The model names are defined in lib/ai/config.ts (DEFAULT_MODEL and FALLBACK_MODEL). The server requests JSON output (generationConfig.responseMimeType = "application/json") and includes the API key in the x-goog-api-key header. The AI only performs structured field extraction (with per-field confidence scores); extracted data is shown to the seller for review and nothing is saved until the seller confirms.
 
 ## Development AI
 
-The coding agent/model used in this builder: unknown, team to confirm.
+Code in this repository was produced with assistance from the Devmarketplace AI builder agent (GPT-4.1 mini and GPT-5 mini) guided by AGENTS.md and SPEC.md. The coding agent helped assemble and edit files; human reviewers tested and adjusted the code.
 
 ## Other AI tools used by the team
 
@@ -14,10 +14,8 @@ The coding agent/model used in this builder: unknown, team to confirm.
 
 ## Open-source components
 
-- Next.js (MIT)
-- Tailwind CSS (MIT)
-- Supabase (Apache 2.0)
+The project uses the dependencies declared in package.json. See package.json for the full list of dependencies and their licenses.
 
 ## Code origin
 
-Code was generated and assembled by an AI coding agent according to specification.
+Code was generated with the Devmarketplace builder agent from AGENTS.md and SPEC.md, then reviewed, tested and edited by the team.

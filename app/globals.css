@@ -33,3 +33,9 @@
     @apply bg-background text-foreground antialiased;
   }
 }
+
+@media print {
+  /* hide nav and buttons when printing */
+  .no-print, nav, header, footer, a[href] { display: none !important; }
+  button { display: none !important; }
+}

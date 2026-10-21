@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { balanceDue, totalFromItems } from "@/lib/calc";
 import type { Extraction } from "@/lib/schema";
 import { Button } from "@/components/ui/button";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -271,7 +272,13 @@ export default function NewOrderPage() {
           />
           <div className="flex flex-wrap items-center gap-2">
             <Button onClick={handleParse} disabled={parsing || saving}>
-              {parsing ? "Reading chat…" : "Read with AI"}
+              {parsing ? (
+                <span className="inline-flex items-center">
+                  <LoadingSpinner size={16} />Reading chat…
+                </span>
+              ) : (
+                "Read with AI"
+              )}
             </Button>
             <Button variant="ghost" onClick={startManual} disabled={parsing || saving}>
               Enter manually
@@ -364,7 +371,13 @@ export default function NewOrderPage() {
 
             <div className="flex flex-wrap gap-2">
               <Button onClick={handleSave} disabled={!canSave}>
-                {saving ? "Saving…" : "Confirm & save"}
+                {saving ? (
+                  <span className="inline-flex items-center">
+                    <LoadingSpinner size={16} />Saving…
+                  </span>
+                ) : (
+                  "Confirm & save"
+                )}
               </Button>
               <Button variant="ghost" onClick={reset} disabled={saving}>
                 Discard

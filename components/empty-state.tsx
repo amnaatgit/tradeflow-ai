@@ -8,7 +8,7 @@ import {
 
 export function EmptyState({
   title = "Nothing here yet",
-  description = "This section is ready for the next phase of development.",
+  description = "Get started by creating an order or exploring the app.",
 }: {
   title?: string;
   description?: string;
@@ -21,7 +21,7 @@ export function EmptyState({
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground">
-          This page is ready for the next phase of development.
+          No content yet. Start by creating something new.
         </p>
       </CardContent>
     </Card>
