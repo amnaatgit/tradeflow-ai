@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { totalFromItems, customerBalance } from "@/lib/calc";
 import { cn } from "@/lib/utils";
+import { MapPin, ShoppingBag, Truck, Wallet } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 type LatestOrder = {
   id: string;
@@ -116,17 +118,22 @@ export default function DashboardPage() {
       </Card>
     );
 
-  const stats = [
-    { title: "Today's orders", value: String(todayCount), note: formatMoney(todaySales), href: "/orders" },
-    { title: "To dispatch", value: String(toDispatch), note: "pending orders", href: "/dispatch" },
-    { title: "To collect", value: formatMoney(toCollect), note: "from customers", href: "/khata" },
-    { title: "Top area (30 days)", value: topArea ?? "—", note: "by orders", href: "/dispatch" },
+  const stats: { title: string; value: string; note: string; href: string; icon: LucideIcon }[] = [
+    { title: "Today's orders", value: String(todayCount), note: formatMoney(todaySales), href: "/orders", icon: ShoppingBag },
+    { title: "To dispatch", value: String(toDispatch), note: "pending orders", href: "/dispatch", icon: Truck },
+    { title: "To collect", value: formatMoney(toCollect), note: "from customers", href: "/khata", icon: Wallet },
+    { title: "Top area (30 days)", value: topArea ?? "—", note: "by orders", href: "/dispatch", icon: MapPin },
   ];
 
   return (
     <div className="space-y-4 p-4">
       <div className="flex items-center justify-between gap-2">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <div>
+          <h1 className="text-2xl font-semibold">Dashboard</h1>
+          <p className="text-sm text-muted-foreground">
+            {new Date().toLocaleDateString("en-PK", { weekday: "long", day: "numeric", month: "long" })}
+          </p>
+        </div>
         <Link href="/orders/new">
           <Button>New order</Button>
         </Link>
@@ -137,7 +144,12 @@ export default function DashboardPage() {
           <Link key={s.title} href={s.href} className="block">
             <Card className="h-full transition-colors hover:bg-muted/40">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">{s.title}</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <span className="rounded-lg bg-primary/10 p-2 text-primary">
+                    <s.icon className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                  {s.title}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="truncate text-2xl font-semibold">{s.value}</div>
@@ -175,7 +187,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="text-right">
                       <div className="text-sm">{formatMoney(totalFromItems(o.order_items || []))}</div>
-                      <div className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleString()}</div>
+                      <div className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleString("en-PK", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}</div>
                     </div>
                     <span
                       className={cn(

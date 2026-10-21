@@ -22,7 +22,7 @@ Tech stack
 - zod for runtime validation of AI output
 
 Live URL
-- (add after deploy)
+- https://tradeflow-ai-phi.vercel.app (sign up with any email; 2FA is optional)
 
 Setup
 1. Copy the environment variable names from `.env.example` into your environment or the Secrets panel. Do NOT store secret keys in source control.

@@ -301,7 +301,43 @@ export default function NewOrderPage() {
 
       <Card>
         <CardContent className="space-y-3 p-4">
-          <Label htmlFor="chat">Order chat</Label>
+          <div className="flex flex-wrap items-center gap-2">
+            <Label htmlFor="chat">Order chat</Label>
+            <span className="text-xs text-muted-foreground">Try a sample:</span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setChat("Assalam o alaikum, Bilal bol raha hun. 3 kurtay chahiye medium size, 1800 ka ek. Address flat 7, Gulshan block 13, Karachi. Number 0333-1112233. 1000 advance bhej diya");
+                setParseError(null);
+              }}
+            >
+              Roman Urdu
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setChat("Hi! I'd like 1 bridal clutch (gold) for Rs 4500 and 2 pairs of jhumkay at 1200 each. Deliver to 45-B Johar Town, Lahore. Call 0312-9988776. I've sent 2000 via JazzCash. - Hira");
+                setParseError(null);
+              }}
+            >
+              English
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setChat("Salam, Usman here. do darjan cupcakes chahiye, 150 ka ek, aur 1 chocolate cake 2 pound wala 2200. Gulshan block 13 flat 22, Karachi. 0345-1239876. Delivery 200 add kar dein. Advance abhi nahi diya");
+                setParseError(null);
+              }}
+            >
+              Mixed
+            </Button>
+          </div>
           <textarea
             id="chat"
             value={chat}
