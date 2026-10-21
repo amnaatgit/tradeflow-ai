@@ -1,0 +1,15 @@
+{
+  "name": "supabase-auth-2fa-kit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Drop-in email/password + TOTP 2FA (authenticator app) for Next.js App Router with Supabase, plus server-side token and 2FA checks and an RLS template.",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "peerDependencies": {
+    "next": ">=14",
+    "react": ">=18"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "ai-whatsapp-drafts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-written WhatsApp messages for small sellers (order confirmations, payment reminders, out-for-delivery, thank-you) in Roman Urdu, Urdu or English with Gemini, zod validation, model fallback and offline templates.",
+  "license": "MIT",
+  "dependencies": { "zod": "^3.23.0" },
+  "peerDependencies": { "next": ">=14", "react": ">=18" }
+}

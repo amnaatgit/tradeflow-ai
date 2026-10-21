@@ -1,0 +1,15 @@
+{
+  "name": "pk-commerce-utils",
+  "version": "1.0.0",
+  "description": "Zero-dependency TypeScript helpers for Pakistani online sellers: phone numbers, WhatsApp links, PKR formatting, Roman Urdu amounts (2 hazar, dedh sau, 1.5k) and khata/ledger math.",
+  "license": "MIT",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "tsc -p tsconfig.test.json && node --test .test-build/test/*.test.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/node": "^20.0.0"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "order-parser-gemini",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Turn WhatsApp/Instagram order chats, chat screenshots and voice notes (English, Roman Urdu or mixed) into validated order JSON with per-field confidence. Gemini + zod.",
+  "license": "MIT",
+  "dependencies": { "zod": "^3.23.0" }
+}
