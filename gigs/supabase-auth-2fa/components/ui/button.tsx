@@ -1,1 +1,12 @@
-export { Button } from '../../components/ui/button';
+"use client";
+
+import * as React from "react";
+
+export function Button(props: any) {
+  return (
+    <button {...props} />
+  );
+}
+
+export default Button;
+

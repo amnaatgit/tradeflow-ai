@@ -9,7 +9,7 @@ create table if not exists items (
 
 alter table items enable row level security;
 
-create policy "Users can insert their rows" on items for insert with (auth.role() = 'authenticated') ;
+create policy "Users can insert their rows" on items for insert with check (auth.uid() = user_id);
 create policy "Users can select their rows" on items for select using (auth.uid() = user_id);
 create policy "Users can update their rows" on items for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "Users can delete their rows" on items for delete using (auth.uid() = user_id);

@@ -2,12 +2,15 @@
   "name": "gigs-supabase-auth-2fa",
   "version": "0.1.0",
   "private": true,
-  "main": "index.tsx",
   "license": "MIT",
   "dependencies": {
-    "@supabase/ssr": "^0.1.0",
-    "@supabase/supabase-js": "~2.109.0",
-    "clsx": "^1.2.1",
-    "tailwind-merge": "^1.14.5"
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "~2.45.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^1.14.0"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1",
+    "next": "^15.5.28"
   }
 }

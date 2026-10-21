@@ -119,7 +119,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>Today's orders</CardTitle>
+            <CardTitle>Today&apos;s orders</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{todayOrdersCount}</div>

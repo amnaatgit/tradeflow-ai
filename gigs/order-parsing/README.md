@@ -22,4 +22,4 @@ Usage
 
 Contributors
 
-- [team to fill in]
+- Amna Shahzad, Mania Ashar and Bisma Shahid
