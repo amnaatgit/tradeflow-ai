@@ -22,11 +22,11 @@ Tech stack
 - zod for runtime validation of AI output
 
 Live URL
-- https://tradeflow-ai-phi.vercel.app (sign up with any email; 2FA is optional)
+- https://tradeflow-ai-phi.vercel.app (sign up with any email, then set up 2FA with an authenticator app)
 
 How to use the live app (no setup needed)
 1. Open https://tradeflow-ai-phi.vercel.app and click **Create free account**. Use any email and a password of 8+ characters (no email confirmation needed).
-2. Sign in. You will be offered **2FA**: click **Show QR code**, scan it with Google Authenticator, Authy or 1Password, and enter the 6-digit code (or click **Skip for now**). You can turn 2FA on or off later on the **Security** page (shield icon on mobile).
+2. Sign in and **set up 2FA**: click **Show QR code**, scan it with Google Authenticator, Authy or 1Password, and enter the 6-digit code. From then on every sign-in asks for a fresh code, and the API rejects requests that skipped it. 2FA is kept optional (with a "Skip for now" button) only so builders and judges can test quickly; it can be turned on or off any time on the **Security** page (shield icon on mobile).
 3. **New order:** press a sample button (**Roman Urdu**, **English** or **Mixed**) or paste your own WhatsApp order chat, then click **Read with AI**. You can also click **Upload screenshot** (a WhatsApp chat screenshot) or **Upload voice note**. The AI fills in the customer, phone, address, items, prices and advance; yellow fields are missing or uncertain. Fix anything, then click **Confirm & save**.
 4. **Orders:** open an order to see its details, record a payment, mark it delivered, or open the **Receipt** and click **Write with AI** for a ready WhatsApp confirmation (Roman Urdu or English).
 5. **Khata:** see what each customer owes, record payments (Cash, JazzCash, Easypaisa, bank) and write an AI payment reminder.
