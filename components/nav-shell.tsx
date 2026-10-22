@@ -41,9 +41,9 @@ function NavLink({ href, children }: { href: string; children: ReactNode }) {
     <Link
       href={href}
       className={cn(
-        "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-muted-foreground",
+        "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-primary",
         isActive(pathname, href)
-          ? "bg-muted text-muted-foreground"
+          ? "bg-primary/10 font-semibold text-primary shadow-[inset_0_0_0_1px_rgba(11,122,90,0.15)]"
           : "text-foreground"
       )}
     >
@@ -55,7 +55,7 @@ function NavLink({ href, children }: { href: string; children: ReactNode }) {
 export function NavShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
-      <nav className="border-b">
+      <nav className="sticky top-0 z-30 border-b bg-white/60 shadow-[0_1px_0_rgba(11,122,90,0.08)] backdrop-blur-xl">
         <div className="container mx-auto flex h-14 items-center gap-1 overflow-x-auto whitespace-nowrap px-4">
           <Link href="/dashboard" className="mr-3 text-sm font-bold text-primary">TradeFlow AI</Link>
           <div className="hidden items-center gap-1 md:flex">
