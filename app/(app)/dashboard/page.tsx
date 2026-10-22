@@ -223,7 +223,7 @@ export default function DashboardPage() {
     );
 
   const stats: { title: string; value: string; note: string; href: string; icon: LucideIcon }[] = [
-    { title: "Today&apos;s orders", value: String(todayCount), note: formatMoney(todaySales), href: "/orders", icon: ShoppingBag },
+    { title: "Today's orders", value: String(todayCount), note: formatMoney(todaySales), href: "/orders", icon: ShoppingBag },
     { title: "To dispatch", value: String(toDispatch), note: "pending orders", href: "/dispatch", icon: Truck },
     { title: "To collect", value: formatMoney(toCollect), note: "from customers", href: "/khata", icon: Wallet },
     { title: "Top area (30 days)", value: topArea ?? "—", note: "by orders", href: "/dispatch", icon: MapPin },

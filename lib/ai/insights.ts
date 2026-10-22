@@ -48,6 +48,7 @@ Rules:
 - Use only the numbers, names, areas and amounts given in the input.
 - Mention real customer names, areas and rupee amounts from the input when useful.
 - Never invent any numbers, dates, discounts, offers, links or shop names.
+- Never add up, subtract or combine amounts yourself; quote each amount exactly as given.
 - Do not reference any external tools or websites.
 - language roman_urdu: natural Pakistani Roman Urdu in Latin letters.
 - language english: simple, clear English.
