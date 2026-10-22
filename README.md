@@ -24,11 +24,28 @@ Tech stack
 Live URL
 - https://tradeflow-ai-phi.vercel.app (sign up with any email; 2FA is optional)
 
-Setup
-1. Copy the environment variable names from `.env.example` into your environment or the Secrets panel. Do NOT store secret keys in source control.
-2. npm install
-3. npm run dev
-4. Create an account and follow the optional TOTP setup flow if you want 2FA.
+How to use the live app (no setup needed)
+1. Open https://tradeflow-ai-phi.vercel.app and click **Create free account**. Use any email and a password of 8+ characters (no email confirmation needed).
+2. Sign in. You will be offered **2FA**: click **Show QR code**, scan it with Google Authenticator, Authy or 1Password, and enter the 6-digit code (or click **Skip for now**). You can turn 2FA on or off later on the **Security** page (shield icon on mobile).
+3. **New order:** press a sample button (**Roman Urdu**, **English** or **Mixed**) or paste your own WhatsApp order chat, then click **Read with AI**. You can also click **Upload screenshot** (a WhatsApp chat screenshot) or **Upload voice note**. The AI fills in the customer, phone, address, items, prices and advance; yellow fields are missing or uncertain. Fix anything, then click **Confirm & save**.
+4. **Orders:** open an order to see its details, record a payment, mark it delivered, or open the **Receipt** and click **Write with AI** for a ready WhatsApp confirmation (Roman Urdu or English).
+5. **Khata:** see what each customer owes, record payments (Cash, JazzCash, Easypaisa, bank) and write an AI payment reminder.
+6. **Dispatch:** pending orders grouped by area with the cash to collect; mark them delivered.
+7. **Dashboard:** today's orders and sales, money to collect, and **Get AI tips** for 3 suggestions based on your own numbers.
+8. **Sign out and sign back in** (with your 2FA code if enabled): everything you saved is still there. A second account sees none of your data.
+
+Setup (run it locally in about 10 minutes)
+
+You need Node.js 18+, a free Supabase project and a free Google AI Studio (Gemini) API key.
+
+1. Clone the repo and install: `git clone https://github.com/amnaatgit/tradeflow-ai && cd tradeflow-ai && npm install`
+2. Create a Supabase project. In its SQL editor, run the files in `supabase/migrations/` in name order (they create the tables and the row-level security policies).
+3. In Supabase: Authentication -> Multi-Factor -> make sure TOTP is enabled. For quick testing you can turn off "Confirm email" under Authentication -> Sign In / Providers -> Email.
+4. Copy `.env.example` to `.env.local` and fill in NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_URL, SUPABASE_ANON_KEY (Supabase -> Project Settings -> API) and GEMINI_API_KEY (https://aistudio.google.com/apikey). Never commit real keys.
+5. `npm run dev`, open http://localhost:3000, click Create free account, sign in, and optionally turn on 2FA.
+6. Try the AI: New order -> press a sample (Roman Urdu / English / Mixed) -> Read with AI -> check the fields -> Confirm & save.
+
+No setup needed to just try it: use the live app at https://tradeflow-ai-phi.vercel.app
 
 Environment variables (see `.env.example`)
 - NEXT_PUBLIC_SUPABASE_URL — Supabase project URL (browser-safe)
