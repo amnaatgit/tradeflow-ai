@@ -24,6 +24,7 @@ Rules:
 - For image screenshots: read the customer's messages from the screenshot (WhatsApp or Instagram). Use the seller's replies only when they confirm a price or quantity. Ignore the status bar, times and read ticks.
 - For audio voice notes: listen to the entire file (Urdu, Roman Urdu or English) and transcribe into Latin letters. Return the transcript string.
 - confidence: 0.9 or more when clearly stated, 0.4 to 0.7 when you had to guess or the text is ambiguous, 0 when the value is null.
+- If the customer says there is no advance (for example: advance nahi diya, abhi advance nahi, COD, cash on delivery, payment on delivery), set advance to 0 with confidence 1.
 - If the text is not an order, return every field null, items [] and every confidence 0.
 
 Example 1 (Roman Urdu)

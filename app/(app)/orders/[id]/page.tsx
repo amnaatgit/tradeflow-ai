@@ -6,7 +6,9 @@ import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { totalFromItems, balanceDue } from "@/lib/calc";
+import { formatDateTime } from "@/lib/format";
 
 type Order = {
   id: string;
@@ -128,7 +130,37 @@ export default function OrderDetail() {
     }
   }
 
-  if (loading) return <p className="p-4">Loading order…</p>;
+  if (loading)
+    return (
+      <div className="space-y-4 p-4">
+        <Card>
+          <CardHeader className="border-b pb-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-6 w-40" />
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </div>
+                <Skeleton className="h-4 w-48" />
+              </div>
+              <div className="space-y-2 text-right">
+                <Skeleton className="h-8 w-24" />
+                <Skeleton className="h-4 w-36" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-4">
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <div className="flex flex-col gap-4 sm:flex-row">
+              <Skeleton className="h-28 w-full sm:w-1/2" />
+              <Skeleton className="h-28 w-full sm:w-1/2" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
 
   if (error)
     return (
@@ -192,7 +224,7 @@ export default function OrderDetail() {
               <div className="flex flex-wrap gap-2 text-xs text-muted-foreground sm:text-sm">
                 <span>{order.customers?.phone || "No phone"}</span>
                 {order.area && <span>· {order.area}</span>}
-                <span>· {new Date(order.created_at).toLocaleString()}</span>
+                <span>· {formatDateTime(order.created_at)}</span>
               </div>
             </div>
             <div className="flex flex-col items-start gap-2 text-xs sm:items-end sm:text-sm">
@@ -310,7 +342,7 @@ export default function OrderDetail() {
                 {payments.map((p) => (
                   <div key={p.id} className="flex items-center justify-between py-2 text-sm">
                     <div className="text-xs text-muted-foreground sm:text-sm">
-                      {new Date(p.created_at).toLocaleString()}
+                      {formatDateTime(p.created_at)}
                     </div>
                     <div className="font-medium tabular-nums">{formatMoney(p.amount)}</div>
                   </div>

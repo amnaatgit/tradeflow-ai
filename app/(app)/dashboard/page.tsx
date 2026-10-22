@@ -4,9 +4,11 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { createClient } from "@/lib/supabase/client";
 import { apiFetch } from "@/lib/api";
 import { totalFromItems, customerBalance } from "@/lib/calc";
+import { formatDate, formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { MapPin, ShoppingBag, Truck, Wallet } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -209,7 +211,47 @@ export default function DashboardPage() {
     }
   }
 
-  if (loading) return <p className="p-4">Loading dashboard…</p>;
+  if (loading)
+    return (
+      <div className="space-y-4 p-4">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <Skeleton className="mb-2 h-6 w-40" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+          <Skeleton className="h-9 w-24" />
+        </div>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i} className="h-full">
+              <CardHeader className="pb-2">
+                <Skeleton className="h-4 w-24" />
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Skeleton className="h-7 w-16" />
+                <Skeleton className="h-3 w-20" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-5 w-32" />
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+                <Skeleton className="h-4 w-20" />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    );
   if (error)
     return (
       <Card>
@@ -234,9 +276,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-semibold">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">
-            {new Date().toLocaleDateString("en-PK", { weekday: "long", day: "numeric", month: "long" })}
-          </p>
+          <p className="text-sm text-muted-foreground">{formatDate(new Date())}</p>
         </div>
         <Link href="/orders/new">
           <Button>New order</Button>
@@ -332,12 +372,7 @@ export default function DashboardPage() {
                     <div className="text-right">
                       <div className="text-sm">{formatMoney(totalFromItems(o.order_items || []))}</div>
                       <div className="text-xs text-muted-foreground">
-                        {new Date(o.created_at).toLocaleString("en-PK", {
-                          day: "numeric",
-                          month: "short",
-                          hour: "numeric",
-                          minute: "2-digit",
-                        })}
+                        {formatDateTime(o.created_at)}
                       </div>
                     </div>
                     <span

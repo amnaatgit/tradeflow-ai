@@ -5,7 +5,9 @@ import { useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { totalFromItems, balanceDue } from '@/lib/calc';
+import { formatDate, formatDateTime } from '@/lib/format';
 import { copyText } from '@/lib/clipboard';
 import { toWhatsAppNumber } from '@/lib/whatsapp';
 import { AiMessageBox } from '@/components/ai-message-box';
@@ -58,7 +60,7 @@ export default function ReceiptPage() {
     const due = balanceDue(total, advance, paymentsSum);
     const lines = [];
     lines.push('TradeFlow AI');
-    lines.push(`Date: ${new Date(order.created_at).toLocaleString()}`);
+    lines.push(`Date: ${formatDateTime(order.created_at)}`);
     lines.push(`Order: ${order.id.slice(0, 8)}`);
     lines.push(`Customer: ${order.customers?.name || 'Unknown'}`);
     lines.push(`Phone: ${order.customers?.phone || '-'}`);
@@ -71,7 +73,9 @@ export default function ReceiptPage() {
     lines.push(`Total: ${formatMoney(total)}`);
     lines.push(`Advance: ${formatMoney(advance)}`);
     lines.push('Payments:');
-    payments.forEach((p) => lines.push(`${new Date(p.created_at).toLocaleDateString()}: ${formatMoney(p.amount)}${p.method ? ` (${p.method})` : ''}`));
+    payments.forEach((p) =>
+      lines.push(`${formatDate(p.created_at)}: ${formatMoney(p.amount)}${p.method ? ` (${p.method})` : ''}`)
+    );
     lines.push(order.status === 'cancelled' ? 'Order CANCELLED. Nothing to collect.' : `Amount due: ${formatMoney(due)}`);
     return lines.join('\n');
   }
@@ -82,7 +86,28 @@ export default function ReceiptPage() {
     if (!ok) setCopyFallback(text);
   }
 
-  if (loading) return <p className="p-4">Loading receipt…</p>;
+  if (loading)
+    return (
+      <div className="space-y-4 p-4">
+        <div className="flex flex-wrap gap-2 print:hidden">
+          <Skeleton className="h-9 w-20" />
+          <Skeleton className="h-9 w-40" />
+          <Skeleton className="h-9 w-36" />
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-32" />
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-4 w-40" />
+            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-4 w-56" />
+            <Skeleton className="h-32 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    );
   if (error) return (
     <Card className="m-4">
       <CardHeader>
@@ -152,7 +177,7 @@ export default function ReceiptPage() {
         <CardContent>
           <div className="prose">
             <h2>TradeFlow AI</h2>
-            <div>{new Date(order.created_at).toLocaleString()}</div>
+            <div>{formatDateTime(order.created_at)}</div>
             <div>Order: {order.id.slice(0,8)}</div>
             {order.status === 'cancelled' && <div className="text-destructive font-bold">CANCELLED</div>}
             <div>Customer: {order.customers?.name || 'Unknown'}</div>
@@ -184,7 +209,10 @@ export default function ReceiptPage() {
               <div className="text-sm">Payments:</div>
               <ul>
                 {payments.map((p) => (
-                  <li key={p.id}>{new Date(p.created_at).toLocaleDateString()}: {formatMoney(p.amount)}{p.method?` · ${p.method}`:''}</li>
+                  <li key={p.id}>
+                    {formatDate(p.created_at)}: {formatMoney(p.amount)}
+                    {p.method ? ` · ${p.method}` : ''}
+                  </li>
                 ))}
               </ul>
               <div className="text-lg font-medium">{order.status === 'cancelled' ? 'Cancelled, nothing to collect' : `Amount due: ${formatMoney(due)}`}</div>

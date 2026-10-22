@@ -6,7 +6,9 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { totalFromItems } from "@/lib/calc";
+import { formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 type OrderRow = {
@@ -58,7 +60,49 @@ export default function OrdersPage() {
     };
   }, []);
 
-  if (loading) return <p className="p-4">Loading orders…</p>;
+  if (loading)
+    return (
+      <div className="space-y-3 p-4">
+        <Card>
+          <CardHeader>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-1">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-3 w-48" />
+              </div>
+              <Skeleton className="h-9 w-24" />
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <Skeleton className="h-9 w-full max-w-xs" />
+              <div className="flex gap-2">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-7 w-20 rounded-full" />
+                ))}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="divide-y">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between gap-4 py-3">
+                  <div className="flex flex-1 items-center gap-3">
+                    <Skeleton className="h-9 w-9 rounded-full" />
+                    <div className="space-y-1">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
 
   const filtered = (orders || []).filter((o) => {
     if (statusFilter !== "all" && o.status !== statusFilter) return false;
@@ -162,7 +206,7 @@ export default function OrdersPage() {
               const customer = o.customers?.name ?? o.customers?.phone ?? "Unknown customer";
               const initial = customer.trim().charAt(0).toUpperCase();
               const total = totalFromItems(o.order_items || []);
-              const date = new Date(o.created_at).toLocaleString();
+              const date = formatDateTime(o.created_at);
               const statusLabel = o.status.charAt(0).toUpperCase() + o.status.slice(1);
 
               const statusColor =

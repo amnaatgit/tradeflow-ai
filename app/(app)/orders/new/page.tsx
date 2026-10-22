@@ -534,6 +534,12 @@ export default function NewOrderPage() {
 
             <div className="space-y-2">
               <Label>Items *</Label>
+              <div className="hidden text-xs text-muted-foreground sm:grid sm:grid-cols-[2fr_1fr_1fr_auto] sm:gap-2">
+                <span>Item</span>
+                <span className="text-right">Qty</span>
+                <span className="text-right">Price (Rs)</span>
+                <span className="sr-only">Actions</span>
+              </div>
               {items.length === 0 && <p className="text-sm text-muted-foreground">No items yet. Add one below.</p>}
               {items.map((it, idx) => {
                 const itemsUnsure = ai !== null && ai.confidence.items < LOW;

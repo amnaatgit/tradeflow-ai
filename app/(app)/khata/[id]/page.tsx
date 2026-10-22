@@ -6,7 +6,9 @@ import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { totalFromItems, customerBalance } from "@/lib/calc";
+import { formatDate, formatDateTime } from "@/lib/format";
 import { normalizePhone } from "@/lib/phone";
 import { copyText } from "@/lib/clipboard";
 import { toWhatsAppNumber } from "@/lib/whatsapp";
@@ -123,7 +125,29 @@ export default function CustomerPage() {
   }, [orders, payments, orderTouched, orderId]);
 
   if (!id) return <p className="p-4">Invalid customer</p>;
-  if (loading) return <p className="p-4">Loading…</p>;
+  if (loading)
+    return (
+      <div className="space-y-4 p-4">
+        <Skeleton className="h-7 w-40" />
+        <div className="grid gap-3 md:grid-cols-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="h-full">
+              <CardHeader>
+                <Skeleton className="h-5 w-28" />
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {Array.from({ length: 3 }).map((__, j) => (
+                  <div key={j} className="flex items-center justify-between gap-4 py-1.5">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
   if (error)
     return (
       <Card className="m-4">
@@ -156,7 +180,7 @@ export default function CustomerPage() {
   const openOrders = orders.filter((o) => o.status !== "cancelled");
   const orderDate = (oid: string | null) => {
     const o = orders.find((x) => x.id === oid);
-    return o ? new Date(o.created_at).toLocaleDateString() : null;
+    return o ? formatDate(o.created_at) : null;
   };
 
   const reminderText = `Assalam o Alaikum ${customer.name || ""}! Aap ka ${formatMoney(
@@ -244,7 +268,12 @@ export default function CustomerPage() {
     <div className="space-y-4 p-4">
       <Card>
         <CardHeader>
-          <CardTitle>{customer.name}</CardTitle>
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-base font-semibold text-primary">
+              {(customer.name || customer.phone || "?").trim().charAt(0).toUpperCase()}
+            </div>
+            <CardTitle>{customer.name}</CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           {!editing ? (
@@ -359,7 +388,7 @@ export default function CustomerPage() {
               return (
                 <div key={o.id} className={cn("flex items-center justify-between gap-3 p-2", cancelled && "opacity-60")}>
                   <div>
-                    <div className="font-medium">{new Date(o.created_at).toLocaleDateString()}</div>
+                    <div className="font-medium">{formatDate(o.created_at)}</div>
                     <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", badge[o.status] ?? badge.cancelled)}>
                       {capitalise(o.status)}
                     </span>
@@ -389,7 +418,7 @@ export default function CustomerPage() {
             {payments.map((p) => (
               <div key={p.id} className="flex items-center justify-between p-2">
                 <div>
-                  <div className="font-medium">{new Date(p.created_at).toLocaleString()}</div>
+                  <div className="font-medium">{formatDateTime(p.created_at)}</div>
                   <div className="text-xs text-muted-foreground">
                     {p.method || "Method not recorded"}
                     {p.order_id && orderDate(p.order_id) ? ` · for order of ${orderDate(p.order_id)}` : ""}
@@ -448,8 +477,7 @@ export default function CustomerPage() {
                 <option value="">Not linked to an order</option>
                 {openOrders.map((o) => (
                   <option key={o.id} value={o.id}>
-                    {new Date(o.created_at).toLocaleDateString()} · {formatMoney(totalFromItems(o.order_items || []))} ·{" "}
-                    {capitalise(o.status)}
+                    {formatDate(o.created_at)} · {formatMoney(totalFromItems(o.order_items || []))} · {capitalise(o.status)}
                   </option>
                 ))}
               </select>

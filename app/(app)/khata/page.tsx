@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { customerBalance } from "@/lib/calc";
 import { cn } from "@/lib/utils";
 
@@ -67,7 +68,45 @@ export default function KhataPage() {
     };
   }, []);
 
-  if (loading) return <p className="p-4">Loading…</p>;
+  if (loading)
+    return (
+      <div className="space-y-3 p-4">
+        <Card>
+          <CardHeader>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div className="space-y-1">
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-3 w-40" />
+              </div>
+              <div className="flex gap-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-7 w-20 rounded-full" />
+                ))}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <Skeleton className="h-9 w-full max-w-xs" />
+            </div>
+            <div className="divide-y">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between gap-4 py-3">
+                  <div className="flex flex-1 items-center gap-3">
+                    <Skeleton className="h-9 w-9 rounded-full" />
+                    <div className="space-y-1">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-28" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-4 w-20" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
 
   if (error)
     return (
