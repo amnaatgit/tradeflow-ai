@@ -1,5 +1,6 @@
 "use client";
 
+import { Users as IcUsers, ClipboardList as IcClipboardList, Wallet as IcWallet } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -152,7 +153,7 @@ export default function CustomerPage() {
     return (
       <Card className="m-4">
         <CardHeader>
-          <CardTitle>Customer</CardTitle>
+          <CardTitle className="flex items-center gap-2.5"><span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-200"><IcUsers className="h-[18px] w-[18px] text-emerald-700" strokeWidth={2} /></span>Customer</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-destructive">Error: {error}</p>
@@ -166,7 +167,7 @@ export default function CustomerPage() {
     return (
       <Card className="m-4">
         <CardHeader>
-          <CardTitle>Customer not found</CardTitle>
+          <CardTitle className="flex items-center gap-2.5"><span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-200"><IcUsers className="h-[18px] w-[18px] text-emerald-700" strokeWidth={2} /></span>Customer not found</CardTitle>
         </CardHeader>
         <CardContent>
           <Link href="/khata">
@@ -378,7 +379,7 @@ export default function CustomerPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Orders</CardTitle>
+          <CardTitle className="flex items-center gap-2.5"><span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-200"><IcClipboardList className="h-[18px] w-[18px] text-emerald-700" strokeWidth={2} /></span>Orders</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="divide-y">
@@ -410,7 +411,7 @@ export default function CustomerPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Payments</CardTitle>
+          <CardTitle className="flex items-center gap-2.5"><span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-200"><IcWallet className="h-[18px] w-[18px] text-emerald-700" strokeWidth={2} /></span>Payments</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="divide-y">
@@ -433,7 +434,7 @@ export default function CustomerPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Record payment</CardTitle>
+          <CardTitle className="flex items-center gap-2.5"><span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-200"><IcWallet className="h-[18px] w-[18px] text-emerald-700" strokeWidth={2} /></span>Record payment</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={recordPayment} className="space-y-3">

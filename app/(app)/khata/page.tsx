@@ -1,5 +1,6 @@
 "use client";
 
+import { BookOpen as IcBookOpen } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -112,7 +113,7 @@ export default function KhataPage() {
     return (
       <Card className="m-4">
         <CardHeader>
-          <CardTitle>Khata</CardTitle>
+          <CardTitle className="flex items-center gap-2.5"><span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-200"><IcBookOpen className="h-[18px] w-[18px] text-emerald-700" strokeWidth={2} /></span>Khata</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-destructive">Error: {error}</p>
@@ -148,7 +149,7 @@ export default function KhataPage() {
     return (
       <Card className="m-4">
         <CardHeader>
-          <CardTitle>Khata</CardTitle>
+          <CardTitle className="flex items-center gap-2.5"><span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-200"><IcBookOpen className="h-[18px] w-[18px] text-emerald-700" strokeWidth={2} /></span>Khata</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="mb-4 text-sm text-muted-foreground">
@@ -167,7 +168,7 @@ export default function KhataPage() {
         <CardHeader>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <CardTitle>Khata</CardTitle>
+              <CardTitle className="flex items-center gap-2.5"><span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-200"><IcBookOpen className="h-[18px] w-[18px] text-emerald-700" strokeWidth={2} /></span>Khata</CardTitle>
               <p className="mt-1 text-sm text-muted-foreground">
                 Total to collect:{" "}
                 <span className="font-semibold tabular-nums">{formatMoney(totalDue)}</span>

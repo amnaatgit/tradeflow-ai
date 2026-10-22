@@ -1,5 +1,6 @@
 "use client";
 
+import { LogIn as IcLogIn } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient } from "../../../lib/supabase/client";
 import { Button } from "../../../components/ui/button";
@@ -55,7 +56,7 @@ export default function SignInPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Sign In</CardTitle>
+        <CardTitle className="flex items-center gap-2.5"><span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-200"><IcLogIn className="h-[18px] w-[18px] text-emerald-700" strokeWidth={2} /></span>Sign In</CardTitle>
         <CardDescription>Sign in with your email and password.</CardDescription>
       </CardHeader>
       <CardContent>
