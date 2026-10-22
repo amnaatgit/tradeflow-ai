@@ -1,5 +1,6 @@
 "use client";
 
+import { ShieldCheck as IcShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -70,7 +71,8 @@ export default function SecurityPage() {
   return (
     <div className="mx-auto w-full max-w-2xl">
       <Card>
-        <CardHeader>
+        <CardHeader className="grid grid-cols-[auto_1fr] items-center gap-x-4 space-y-0">
+          <IcShieldCheck aria-hidden className="row-span-2 h-12 w-12 text-emerald-700 drop-shadow-[0_4px_10px_rgba(4,120,87,0.25)]" fill="#d1fae5" strokeWidth={1.75} />
           <CardTitle>Security</CardTitle>
           <p className="text-sm text-muted-foreground">Signed in as {email}</p>
         </CardHeader>

@@ -1,5 +1,6 @@
 "use client";
 
+import { ClipboardList as IcClipboardList } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -166,7 +167,7 @@ export default function OrderDetail() {
     return (
       <Card className="m-4">
         <CardHeader>
-          <CardTitle>Order</CardTitle>
+          <CardTitle className="flex items-center gap-2.5"><span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-200"><IcClipboardList className="h-[18px] w-[18px] text-emerald-700" strokeWidth={2} /></span>Order</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-destructive">Error: {error}</p>
@@ -181,7 +182,7 @@ export default function OrderDetail() {
     return (
       <Card className="m-4">
         <CardHeader>
-          <CardTitle>Order not found</CardTitle>
+          <CardTitle className="flex items-center gap-2.5"><span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-200"><IcClipboardList className="h-[18px] w-[18px] text-emerald-700" strokeWidth={2} /></span>Order not found</CardTitle>
         </CardHeader>
         <CardContent>
           <p>That order does not exist.</p>

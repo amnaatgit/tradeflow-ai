@@ -1,5 +1,6 @@
 "use client";
 
+import { ClipboardList as IcClipboardList } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -346,7 +347,7 @@ export default function DashboardPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Latest orders</CardTitle>
+          <CardTitle className="flex items-center gap-2.5"><span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-200"><IcClipboardList className="h-[18px] w-[18px] text-emerald-700" strokeWidth={2} /></span>Latest orders</CardTitle>
         </CardHeader>
         <CardContent>
           {latest.length === 0 ? (

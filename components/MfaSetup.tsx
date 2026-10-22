@@ -1,5 +1,6 @@
 "use client";
 
+import { ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { SignOutButton } from "./sign-out-button";
 import { createClient } from "../lib/supabase/client";
@@ -93,7 +94,8 @@ export function MfaSetup() {
   if (!factor) {
     return (
       <Card>
-        <CardHeader>
+        <CardHeader className="grid grid-cols-[auto_1fr] items-center gap-x-4 space-y-0">
+          <ShieldCheck aria-hidden className="row-span-2 h-12 w-12 text-emerald-700 drop-shadow-[0_4px_10px_rgba(4,120,87,0.25)]" fill="#d1fae5" strokeWidth={1.75} />
           <CardTitle>Set up 2FA (optional)</CardTitle>
           <CardDescription>
             Add an extra layer of security to your account with an authenticator
@@ -122,7 +124,8 @@ export function MfaSetup() {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="grid grid-cols-[auto_1fr] items-center gap-x-4 space-y-0">
+          <ShieldCheck aria-hidden className="row-span-2 h-12 w-12 text-emerald-700 drop-shadow-[0_4px_10px_rgba(4,120,87,0.25)]" fill="#d1fae5" strokeWidth={1.75} />
         <CardTitle>Scan the QR code</CardTitle>
         <CardDescription>
           Open your authenticator app, scan the code, then enter the 6-digit

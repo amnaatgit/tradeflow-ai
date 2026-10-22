@@ -1,5 +1,6 @@
 "use client";
 
+import { ClipboardList as IcClipboardList } from "lucide-react";
 import React from "react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -120,7 +121,7 @@ export default function OrdersPage() {
     return (
       <Card className="m-4">
         <CardHeader>
-          <CardTitle>Orders</CardTitle>
+          <CardTitle className="flex items-center gap-2.5"><span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-200"><IcClipboardList className="h-[18px] w-[18px] text-emerald-700" strokeWidth={2} /></span>Orders</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-destructive">Error: {error}</p>
@@ -132,7 +133,7 @@ export default function OrdersPage() {
     return (
       <Card className="m-4">
         <CardHeader>
-          <CardTitle>Orders</CardTitle>
+          <CardTitle className="flex items-center gap-2.5"><span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-200"><IcClipboardList className="h-[18px] w-[18px] text-emerald-700" strokeWidth={2} /></span>Orders</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="mb-4">No orders yet.</p>
@@ -149,7 +150,7 @@ export default function OrdersPage() {
         <CardHeader>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle>Your orders</CardTitle>
+              <CardTitle className="flex items-center gap-2.5"><span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-200"><IcClipboardList className="h-[18px] w-[18px] text-emerald-700" strokeWidth={2} /></span>Your orders</CardTitle>
               <p className="mt-1 text-sm text-muted-foreground">
                 Track recent orders and their status in one place.
               </p>

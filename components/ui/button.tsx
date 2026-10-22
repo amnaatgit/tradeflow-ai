@@ -14,7 +14,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(
           "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 ease-out hover:-translate-y-px active:translate-y-0 active:scale-[0.98] active:ring-2 active:ring-primary/40 active:ring-offset-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
           variant === "default" &&
-            "bg-gradient-to-b from-emerald-600 to-primary font-semibold text-primary-foreground shadow-[0_1px_2px_rgba(16,24,40,0.10),inset_0_1px_0_rgba(255,255,255,0.18)] hover:shadow-[0_8px_22px_-6px_rgba(11,122,90,0.55)] hover:brightness-105",
+            "relative overflow-hidden after:pointer-events-none after:absolute after:inset-0 after:-translate-x-full after:bg-gradient-to-r after:from-transparent after:via-white/30 after:to-transparent after:transition-transform after:duration-700 hover:after:translate-x-full bg-gradient-to-b from-emerald-600 to-primary font-semibold text-primary-foreground shadow-[0_1px_2px_rgba(16,24,40,0.10),inset_0_1px_0_rgba(255,255,255,0.18)] hover:shadow-[0_8px_22px_-6px_rgba(11,122,90,0.55)] hover:brightness-105",
           variant === "secondary" &&
             "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
           variant === "destructive" &&

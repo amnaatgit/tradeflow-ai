@@ -4,7 +4,9 @@ import { AuthGuard } from "@/components/auth-guard";
 export default function SetupPage() {
   return (
     <AuthGuard need="session">
-      <MfaSetup />
+      <div>
+        <MfaSetup />
+      </div>
     </AuthGuard>
   );
 }

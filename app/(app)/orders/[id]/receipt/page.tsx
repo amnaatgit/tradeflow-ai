@@ -1,5 +1,6 @@
 "use client";
 
+import { ReceiptText as IcReceiptText } from "lucide-react";
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -111,7 +112,7 @@ export default function ReceiptPage() {
   if (error) return (
     <Card className="m-4">
       <CardHeader>
-        <CardTitle>Receipt</CardTitle>
+        <CardTitle className="flex items-center gap-2.5"><span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-200"><IcReceiptText className="h-[18px] w-[18px] text-emerald-700" strokeWidth={2} /></span>Receipt</CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-destructive">Error: {error}</p>
@@ -121,7 +122,7 @@ export default function ReceiptPage() {
   if (!order) return (
     <Card className="m-4">
       <CardHeader>
-        <CardTitle>Receipt</CardTitle>
+        <CardTitle className="flex items-center gap-2.5"><span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-200"><IcReceiptText className="h-[18px] w-[18px] text-emerald-700" strokeWidth={2} /></span>Receipt</CardTitle>
       </CardHeader>
       <CardContent>
         <p>Order not found.</p>
@@ -172,7 +173,7 @@ export default function ReceiptPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Receipt</CardTitle>
+          <CardTitle className="flex items-center gap-2.5"><span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-200"><IcReceiptText className="h-[18px] w-[18px] text-emerald-700" strokeWidth={2} /></span>Receipt</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="prose">

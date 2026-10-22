@@ -81,7 +81,7 @@ export function NavShell({ children }: { children: ReactNode }) {
       <main className="container mx-auto flex flex-grow flex-col px-4 pt-6 pb-24 md:pb-6">
         {children}
       </main>
-      <div className="no-print fixed inset-x-0 bottom-0 z-40 border-t bg-background md:hidden">
+      <div className="no-print fixed inset-x-0 bottom-0 z-40 border-t border-white/60 bg-white/70 shadow-[0_-8px_24px_-16px_rgba(11,122,90,0.35)] backdrop-blur-xl md:hidden">
         <div className="grid grid-cols-5">
           <MobileLink href="/dashboard" label="Home" icon={<LayoutDashboard className="h-5 w-5" />} />
           <MobileLink href="/orders/new" label="New" icon={<PlusCircle className="h-5 w-5" />} />
