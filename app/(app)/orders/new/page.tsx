@@ -28,6 +28,29 @@ type ConfKey = keyof Extraction["confidence"];
 const LOW = 0.7;
 const MAX_CHARS = 4000;
 
+const SAMPLES: { roman: string[]; english: string[]; mixed: string[] } = {
+  roman: [
+    "Assalam o alaikum, Bilal bol raha hun. 3 kurtay chahiye medium size, 1800 ka ek. Address flat 7, Gulshan block 13, Karachi. Number 0333-1112233. 1000 advance bhej diya",
+    "AoA baji, mujhe 2 lawn suit chahiye, ek maroon aur ek mint green, 3500 ka ek. Address house 45, street 9, G-11/2 Islamabad. Number 0301-5566778. 2000 advance JazzCash kar diya hai. Naam Fatima",
+    "Bhai 5 kg basmati chawal chahiye 380 rupay kilo, aur 2 desi ghee ke dabbay 1450 ka ek. Satellite Town block C, ghar 112, Rawalpindi. 0322-4477889. Cash on delivery. Imran",
+    "Salam, 1 darjan cupcakes chahiye birthday ke liye, 150 ka ek, aur 1 chocolate cake 2 pound wala 2200 ka. Model Town Lahore, house 7-A. 0333-9081726. 1000 advance easypaisa kar diya. Ayesha",
+  ],
+  english: [
+    "Hi! I'd like 1 bridal clutch (gold) for Rs 4500 and 2 pairs of jhumkay at 1200 each. Deliver to 45-B Johar Town, Lahore. Call 0312-9988776. I've sent 2000 via JazzCash. - Hira",
+    "Hello, I want to order 3 scented candles (vanilla) at Rs 850 each and 1 gift box for Rs 500. Please deliver to Flat 12, Clifton Block 5, Karachi. My number is 0300-2233445. I'll pay cash on delivery. Thanks, Sana",
+    "Hi, can I get 2 white kurta shalwar (size L) at 3200 each and 1 waistcoat for 4500? Address: House 21, Street 4, F-7/3 Islamabad. Phone 0345-6677889. I sent 3000 advance by bank transfer. - Ahmed",
+    "Good evening! Please send 4 jars of honey (500g) at Rs 1100 each. Delivery to 88-C Gulberg III, Lahore. Contact 0321-1239870. Paid 1000 advance on Easypaisa. Name: Zainab",
+  ],
+  mixed: [
+    "Salam, Usman here. do darjan cupcakes chahiye, 150 ka ek, aur 1 chocolate cake 2 pound wala 2200. Gulshan block 13 flat 22, Karachi. 0345-1239876. Delivery 200 add kar dein. Advance abhi nahi diya",
+    "Hi baji, Maria here. 2 abaya chahiye black, size 54, 4200 each, aur 1 hijab set 900. Address DHA phase 6, street 11, house 3, Karachi. Number 0312-7788990. 2000 advance sent on JazzCash, delivery 250 theek hai",
+    "Assalam o alaikum! I need 3 packs of organic shahad, 1200 ka ek, and 1 kg dry fruit mix for 2800. Bahria Town phase 4, house 19, Rawalpindi. 0302-3344556. COD please. - Kamran",
+    "Salam, 2 pairs khussa (golden, size 7) 2500 each and 1 clutch 1800 please. Deliver to Hayatabad phase 3, house 55, Peshawar. Number 0315-9988112. Advance nahi diya, cash on delivery. Rabia",
+  ],
+};
+
+type SampleKind = keyof typeof SAMPLES;
+
 const emptyItem = (): ItemRow => ({ name: "", qty: "1", unit_price: "" });
 const emptyDraft = (): Draft => ({
   customer_name: "",
@@ -106,6 +129,20 @@ export default function NewOrderPage() {
     if (audioInputRef.current) audioInputRef.current.value = "";
   }
 
+  function pickRandomSample(kind: SampleKind, current: string): string {
+    const options = SAMPLES[kind];
+    if (!options || options.length === 0) return current;
+    const different = options.filter((s) => s !== current);
+    const pool = different.length > 0 ? different : options;
+    const index = Math.floor(Math.random() * pool.length);
+    return pool[index];
+  }
+
+  function handleSampleClick(kind: SampleKind) {
+    const sample = pickRandomSample(kind, chat);
+    setChat(sample);
+    setParseError(null);
+  }
 
   async function handleParse() {
     setParseError(null);
@@ -308,10 +345,7 @@ export default function NewOrderPage() {
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => {
-                setChat("Assalam o alaikum, Bilal bol raha hun. 3 kurtay chahiye medium size, 1800 ka ek. Address flat 7, Gulshan block 13, Karachi. Number 0333-1112233. 1000 advance bhej diya");
-                setParseError(null);
-              }}
+              onClick={() => handleSampleClick("roman")}
             >
               Roman Urdu
             </Button>
@@ -319,10 +353,7 @@ export default function NewOrderPage() {
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => {
-                setChat("Hi! I'd like 1 bridal clutch (gold) for Rs 4500 and 2 pairs of jhumkay at 1200 each. Deliver to 45-B Johar Town, Lahore. Call 0312-9988776. I've sent 2000 via JazzCash. - Hira");
-                setParseError(null);
-              }}
+              onClick={() => handleSampleClick("english")}
             >
               English
             </Button>
@@ -330,10 +361,7 @@ export default function NewOrderPage() {
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => {
-                setChat("Salam, Usman here. do darjan cupcakes chahiye, 150 ka ek, aur 1 chocolate cake 2 pound wala 2200. Gulshan block 13 flat 22, Karachi. 0345-1239876. Delivery 200 add kar dein. Advance abhi nahi diya");
-                setParseError(null);
-              }}
+              onClick={() => handleSampleClick("mixed")}
             >
               Mixed
             </Button>

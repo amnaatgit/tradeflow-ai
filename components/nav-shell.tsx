@@ -10,6 +10,7 @@ import {
   ClipboardList,
   LayoutDashboard,
   PlusCircle,
+  ShieldCheck,
   Truck,
 } from "lucide-react";
 
@@ -66,6 +67,13 @@ export function NavShell({ children }: { children: ReactNode }) {
             <NavLink href="/security">Security</NavLink>
           </div>
           <div className="ml-auto flex items-center gap-1">
+            <Link
+              href="/security"
+              aria-label="Security"
+              className="rounded-md p-2 text-muted-foreground hover:bg-muted md:hidden"
+            >
+              <ShieldCheck className="h-5 w-5" />
+            </Link>
             <SignOutButton />
           </div>
         </div>

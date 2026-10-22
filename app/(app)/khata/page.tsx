@@ -43,16 +43,19 @@ export default function KhataPage() {
         if (res.error) throw res.error;
         if (pRes.error) throw pRes.error;
         const payments = pRes.data || [];
-        const rows: Row[] = ((res.data as unknown as (Row & { orders: unknown[] })[]) || []).map((c) => ({
-          id: c.id,
-          name: c.name,
-          phone: c.phone,
-          area: c.area,
-          balance: customerBalance(
-            c.orders || [],
-            payments.filter((p) => p.customer_id === c.id)
-          ),
-        }));
+        const rows: Row[] = ((res.data as unknown as (Row & { orders: unknown[] })[]) || []).map(
+          (c) => ({
+            id: c.id,
+            name: c.name,
+            phone: c.phone,
+            area: c.area,
+            balance: customerBalance(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (c as any).orders || [],
+              payments.filter((p) => p.customer_id === c.id)
+            ),
+          })
+        );
         if (mounted) setCustomers(rows);
       } catch (err) {
         if (mounted) setError((err as { message?: string })?.message ?? String(err));
@@ -66,6 +69,7 @@ export default function KhataPage() {
   }, []);
 
   if (loading) return <p className="p-4">Loading…</p>;
+
   if (error)
     return (
       <Card className="m-4">
@@ -79,16 +83,20 @@ export default function KhataPage() {
     );
 
   const all = customers || [];
+
   const matchesFilter = (c: Row) =>
     filter === "all" ||
     (filter === "due" && c.balance > 0) ||
     (filter === "paid" && c.balance === 0) ||
     (filter === "credit" && c.balance < 0);
+
   const q = query.trim().toLowerCase();
+
   const filtered = all
     .filter(matchesFilter)
     .filter((c) => !q || (c.name || "").toLowerCase().includes(q) || (c.phone || "").includes(q))
     .sort((a, b) => b.balance - a.balance);
+
   const totalDue = all.reduce((s, c) => s + (c.balance > 0 ? c.balance : 0), 0);
 
   const chips: { key: Filter; label: string; count: number }[] = [
@@ -119,19 +127,14 @@ export default function KhataPage() {
     <div className="space-y-3 p-4">
       <Card>
         <CardHeader>
-          <CardTitle>Khata</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Total to collect: <span className="font-semibold text-foreground">{formatMoney(totalDue)}</span>
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-3 flex flex-wrap items-center gap-2">
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search name or phone"
-              className="min-w-[180px] flex-1 rounded border px-3 py-2"
-            />
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <CardTitle>Khata</CardTitle>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Total to collect:{" "}
+                <span className="font-semibold tabular-nums">{formatMoney(totalDue)}</span>
+              </p>
+            </div>
             <div className="flex flex-wrap gap-1">
               {chips.map((c) => (
                 <button
@@ -139,8 +142,10 @@ export default function KhataPage() {
                   type="button"
                   onClick={() => setFilter(c.key)}
                   className={cn(
-                    "rounded px-2 py-1 text-sm",
-                    filter === c.key ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                    "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium transition-colors",
+                    filter === c.key
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
                   )}
                 >
                   {c.label} ({c.count})
@@ -148,13 +153,23 @@ export default function KhataPage() {
               ))}
             </div>
           </div>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search name or phone"
+              className="min-w-[180px] flex-1 rounded-md border bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            />
+          </div>
           <div className="divide-y">
             {filtered.length === 0 && (
               <div className="py-6 text-center text-sm text-muted-foreground">
-                No customers match.{" "}
+                No customers match.
                 <button
                   type="button"
-                  className="text-primary underline"
+                  className="ml-1 text-primary underline underline-offset-2"
                   onClick={() => {
                     setQuery("");
                     setFilter("all");
@@ -164,30 +179,50 @@ export default function KhataPage() {
                 </button>
               </div>
             )}
-            {filtered.map((c) => (
-              <Link key={c.id} href={`/khata/${c.id}`} className="block p-3 hover:bg-muted/50">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <div className="font-medium">{c.name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {c.phone || "No phone"}
-                      {c.area ? ` · ${c.area}` : ""}
+            {filtered.map((c) => {
+              const name = c.name || c.phone || "Unknown customer";
+              const initial = name.trim().charAt(0).toUpperCase();
+
+              return (
+                <Link
+                  key={c.id}
+                  href={`/khata/${c.id}`}
+                  className="block rounded-md px-3 py-3 transition-colors hover:bg-muted/60"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-1 items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+                        {initial}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-medium">{name}</div>
+                        <div className="mt-0.5 text-xs text-muted-foreground">
+                          {c.phone || "No phone"}
+                          {c.area ? ` · ${c.area}` : ""}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 text-right text-xs sm:text-sm">
+                      {c.balance > 0 && (
+                        <div className="font-semibold text-red-700 tabular-nums">
+                          {formatMoney(c.balance)}
+                        </div>
+                      )}
+                      {c.balance === 0 && (
+                        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-800 ring-1 ring-inset ring-emerald-100">
+                          All paid
+                        </span>
+                      )}
+                      {c.balance < 0 && (
+                        <span className="rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-800 ring-1 ring-inset ring-sky-100">
+                          Credit <span className="tabular-nums">{formatMoney(Math.abs(c.balance))}</span>
+                        </span>
+                      )}
                     </div>
                   </div>
-                  <div className="text-right">
-                    {c.balance > 0 && <div className="font-semibold text-red-700">{formatMoney(c.balance)}</div>}
-                    {c.balance === 0 && (
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">All paid</span>
-                    )}
-                    {c.balance < 0 && (
-                      <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
-                        Credit {formatMoney(Math.abs(c.balance))}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
