@@ -9,7 +9,7 @@ Provider: Google Gemini (Generative Language API) called via the server route /a
 Code in this repository was produced with assistance from the Devmarketplace AI builder agent (models used: GPT-4.1 mini, GPT-5 mini, GPT-5.6 Luna and GPT-5.1) guided by AGENTS.md and SPEC.md. The coding agent helped assemble and edit files; human reviewers tested and adjusted the code.
 
 ##Other AI tools used by the team
-Gemini 
+generation wad done by the agent on the website itself 
 
 ## Open-source components
 
@@ -33,4 +33,4 @@ Hosted services: Supabase (Postgres database and Auth with TOTP 2FA), Google Gem
 
 ## Code origin
 
-Code was generated with the Devmarketplace builder agent from AGENTS.md and SPEC.md, then reviewed, tested and edited by the team.
+Code was generated with the Devmarketplace builder agent from AGENTS.md and SPEC.md, then reviewed, tested and edited by the team. 
