@@ -50,7 +50,6 @@ export default function KhataPage() {
             phone: c.phone,
             area: c.area,
             balance: customerBalance(
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (c as any).orders || [],
               payments.filter((p) => p.customer_id === c.id)
             ),
