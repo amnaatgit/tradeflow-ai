@@ -1,19 +1,13 @@
 "use client";
 
-import { ShieldCheck } from "lucide-react";
+import { QrCode, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { SignOutButton } from "./sign-out-button";
 import { createClient } from "../lib/supabase/client";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
+import { Card, CardContent, CardHero } from "./ui/card";
 
 interface MfaEnrollResponse {
   id: string;
@@ -94,14 +88,11 @@ export function MfaSetup() {
   if (!factor) {
     return (
       <Card>
-        <CardHeader className="grid grid-cols-[auto_1fr] items-center gap-x-4 space-y-0">
-          <ShieldCheck aria-hidden className="row-span-2 h-12 w-12 text-emerald-700 drop-shadow-[0_4px_10px_rgba(4,120,87,0.25)]" fill="#d1fae5" strokeWidth={1.75} />
-          <CardTitle>Set up 2FA (optional)</CardTitle>
-          <CardDescription>
-            Add an extra layer of security to your account with an authenticator
-            app.
-          </CardDescription>
-        </CardHeader>
+        <CardHero
+          icon={<ShieldCheck strokeWidth={2.25} />}
+          title="Set up 2FA (optional)"
+          description="Add an extra layer of security to your account with an authenticator app."
+        />
         <CardContent>
           {error && (
             <p className="mb-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
@@ -124,14 +115,11 @@ export function MfaSetup() {
 
   return (
     <Card>
-      <CardHeader className="grid grid-cols-[auto_1fr] items-center gap-x-4 space-y-0">
-          <ShieldCheck aria-hidden className="row-span-2 h-12 w-12 text-emerald-700 drop-shadow-[0_4px_10px_rgba(4,120,87,0.25)]" fill="#d1fae5" strokeWidth={1.75} />
-        <CardTitle>Scan the QR code</CardTitle>
-        <CardDescription>
-          Open your authenticator app, scan the code, then enter the 6-digit
-          code below.
-        </CardDescription>
-      </CardHeader>
+      <CardHero
+        icon={<QrCode strokeWidth={2.25} />}
+        title="Scan the QR code"
+        description="Open your authenticator app, scan the code, then enter the 6-digit code below."
+      />
       <CardContent>
         {error && (
           <p className="mb-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">

@@ -1,17 +1,12 @@
 "use client";
 
+import { UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient } from "../../../lib/supabase/client";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../../../components/ui/card";
+import { Card, CardContent, CardHero } from "../../../components/ui/card";
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("");
@@ -94,10 +89,11 @@ export default function SignUpPage() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Create account</CardTitle>
-        <CardDescription>Create your TradeFlow AI account. You can turn on 2FA after you sign in.</CardDescription>
-      </CardHeader>
+      <CardHero
+        icon={<UserPlus strokeWidth={2.25} />}
+        title="Create your account"
+        description="Start turning order chats into saved orders. You can turn on 2FA after you sign in."
+      />
       <CardContent>
         {error && <p className="mb-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error} {showSignInLink && (<a href="/auth/sign-in" className="text-primary underline ml-2">Sign in instead</a>)}</p>}
         {notice && <p className="mb-4 rounded-md bg-muted p-3 text-sm">{notice}</p>}

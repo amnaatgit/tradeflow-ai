@@ -1,19 +1,13 @@
 "use client";
 
-import { ShieldCheck } from "lucide-react";
+import { KeyRound } from "lucide-react";
 import { useState } from "react";
 import { SignOutButton } from "./sign-out-button";
 import { createClient } from "../lib/supabase/client";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
+import { Card, CardContent, CardHero } from "./ui/card";
 
 export function MfaVerify() {
   const [code, setCode] = useState("");
@@ -68,13 +62,11 @@ export function MfaVerify() {
 
   return (
     <Card>
-      <CardHeader className="grid grid-cols-[auto_1fr] items-center gap-x-4 space-y-0">
-          <ShieldCheck aria-hidden className="row-span-2 h-12 w-12 text-emerald-700 drop-shadow-[0_4px_10px_rgba(4,120,87,0.25)]" fill="#d1fae5" strokeWidth={1.75} />
-        <CardTitle>Two-factor authentication</CardTitle>
-        <CardDescription>
-          Enter the 6-digit code from your authenticator app to continue.
-        </CardDescription>
-      </CardHeader>
+      <CardHero
+        icon={<KeyRound strokeWidth={2.25} />}
+        title="Two-factor authentication"
+        description="Enter the 6-digit code from your authenticator app to continue."
+      />
       <CardContent>
         {error && (
           <p className="mb-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">

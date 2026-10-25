@@ -6,13 +6,7 @@ import { createClient } from "../../../lib/supabase/client";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../../../components/ui/card";
+import { Card, CardContent, CardHero } from "../../../components/ui/card";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -55,10 +49,11 @@ export default function SignInPage() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2.5"><span aria-hidden className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-200"><IcLogIn className="h-[18px] w-[18px] text-emerald-700" strokeWidth={2} /></span>Sign In</CardTitle>
-        <CardDescription>Sign in with your email and password.</CardDescription>
-      </CardHeader>
+      <CardHero
+        icon={<IcLogIn strokeWidth={2.25} />}
+        title="Sign in"
+        description="Welcome back. Enter your email and password to continue."
+      />
       <CardContent>
         {createdFlash && (
           <p className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-800">{createdFlash}</p>
@@ -96,7 +91,7 @@ export default function SignInPage() {
             />
           </div>
           <Button type="submit" disabled={loading || !ready} className="w-full">
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? "Signing in..." : "Sign in"}
           </Button>
         </form>
         <p className="mt-4 text-center text-sm text-muted-foreground">

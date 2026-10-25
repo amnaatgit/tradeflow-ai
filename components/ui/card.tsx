@@ -60,4 +60,34 @@ const CardContent = React.forwardRef<
 ));
 CardContent.displayName = "CardContent";
 
-export { Card, CardHeader, CardTitle, CardDescription, CardContent };
+/* Large centred header for the auth cards: icon tile, title, description */
+function CardHero({
+  icon,
+  title,
+  description,
+  className,
+}: {
+  icon: React.ReactNode;
+  title: React.ReactNode;
+  description?: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("tf-hero flex flex-col items-center px-6 pb-6 pt-10 text-center sm:px-10 sm:pt-12", className)}>
+      <span
+        aria-hidden
+        className="tf-hero-icon relative mb-6 flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-[1.375rem] bg-gradient-to-br from-emerald-400 via-emerald-600 to-emerald-800 text-white shadow-[0_14px_30px_-10px_rgba(4,120,87,0.6),inset_0_1px_0_rgba(255,255,255,0.35)] ring-[6px] ring-emerald-100/70 before:absolute before:-inset-4 before:-z-10 before:rounded-[2rem] before:bg-emerald-300/30 before:blur-xl [&>svg]:h-8 [&>svg]:w-8"
+      >
+        {icon}
+      </span>
+      <h3 className="tf-hero-title bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-800 bg-clip-text pb-0.5 font-extrabold tracking-tight text-transparent">
+        {title}
+      </h3>
+      {description ? (
+        <p className="mt-2.5 max-w-sm text-[0.9375rem] leading-6 text-muted-foreground">{description}</p>
+      ) : null}
+    </div>
+  );
+}
+
+export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardHero };
